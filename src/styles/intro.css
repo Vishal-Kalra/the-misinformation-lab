@@ -1,0 +1,23 @@
+#intro { background: #0B0B0F; color: #E9E9EE; justify-content: center; padding: 36px 30px; gap: 16px; }
+#intro .k { font-family: var(--mono); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: #7A7A85; }
+#intro h1 { font-family: "Newsreader", serif; font-weight: 300; font-size: 34px; line-height: 1.12; margin: 0; letter-spacing: -.02em; }
+#intro h1 em { font-style: italic; color: #C9C2E8; }
+#intro p { font-size: 14px; color: #8B8B96; margin: 0; line-height: 1.6; max-width: 32ch; }
+#intro button { margin-top: 12px; align-self: flex-start; background: #E9E9EE; color: #0B0B0F; border: none; padding: 14px 28px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; }
+
+.inter { position: absolute; inset: 0; background: #fff; z-index: 60; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; text-align: center; padding: 32px; transition: opacity .5s; }
+.inter .k { font-family: var(--mono); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--p2mute); }
+.inter h2 { margin: 0; font-family: "Space Grotesk", sans-serif; font-size: 25px; font-weight: 700; letter-spacing: -.02em; color: var(--p2ink); line-height: 1.2; }
+.inter p { margin: 0; font-size: 13.5px; color: var(--p2mute); max-width: 29ch; }
+.inter button { margin-top: 8px; background: var(--p2act); color: #fff; border: none; padding: 13px 26px; border-radius: 10px; font-size: 13.5px; font-weight: 700; }
+
+/* Desktop: this is a browser tab, not a phone screen — give the intro room to breathe. */
+@media (min-width: 700px) {
+  #intro { max-width: 720px; width: 100%; margin: 0 auto; padding: 0 48px; gap: 22px; }
+  #intro h1 { font-size: 52px; }
+  #intro p { font-size: 16px; max-width: 42ch; }
+  #intro button { padding: 16px 34px; font-size: 15px; }
+  .inter h2 { font-size: 36px; }
+  .inter p { font-size: 15px; max-width: 38ch; }
+  .inter button { padding: 15px 32px; font-size: 14.5px; }
+}

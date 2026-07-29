@@ -1,0 +1,45 @@
+/* Design tokens — SPEC.md §3. Do not use a dark/terminal aesthetic anywhere. */
+:root {
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --p1bg: #FBFBFD; --p1card: #FFF; --p1ink: #16181C; --p1mute: #65686D; --p1line: #E4E6EB; --p1act: #1D6FF2;
+  --p2bg: #F1EFF8; --p2card: #FFF; --p2ink: #241A47; --p2mute: #6F6791; --p2line: #E3DFF2; --p2act: #4B32A8; --go: #0F9D58;
+  --p3ink: #111; --p3mute: #7A7A7A; --p3line: #E6E6E6; --mark: #B4522A;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: #0B0B0F;
+  min-height: 100vh;
+  font-family: system-ui, sans-serif;
+}
+/* Full-bleed app shell — each phase fills the browser and centers its own
+   readable content column via width caps on #p1/#p2/#p3/#prof (see below).
+   No fixed-width "phone in a void" frame: this is a website, not a device mock. */
+#app {
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: background .6s ease;
+}
+.hidden { display: none !important; }
+button { font-family: inherit; cursor: pointer; }
+button:disabled { cursor: default; }
+.scr { flex: 1; display: flex; flex-direction: column; position: relative; }
+.bar { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; flex: none; }
+.pad { padding: 0 16px; }
+
+/* Keyboard focus is visible everywhere, but never adds a ring on mouse/touch clicks. */
+:focus { outline: none; }
+:focus-visible {
+  outline: 2px solid #4B32A8;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
