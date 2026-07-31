@@ -1,20 +1,30 @@
 import { useEffect, useRef, useState } from "react";
 import { useStore } from "../../store";
-import { ARTS, AUD_BASE } from "../../data/posts";
+import { ARTS, AUD_BASE, CONTRIBUTE_IMAGES } from "../../data/posts";
 import { getAudienceMatch, getOpeningOptions, getOpeningIntroMessage, getValeResponse } from "../../services/valeService";
 import CampaignSetup from "./CampaignSetup";
 import PostCanvas from "./PostCanvas";
 import ValeChat from "./ValeChat";
 import ArtifactPalette from "./ArtifactPalette";
+import PropertiesPanel from "./PropertiesPanel";
 import CredibilityMeter from "./CredibilityMeter";
 import SpreadView from "./SpreadView";
+import ContributePanel from "./ContributePanel";
 
 export default function Phase2({ onPublished }) {
   const campaign = useStore((s) => s.campaign);
   const setCampaignField = useStore((s) => s.setCampaignField);
   const setCampaign = useStore((s) => s.setCampaign);
   const artifacts = useStore((s) => s.artifacts);
-  const addArtifact = useStore((s) => s.addArtifact);
+  const placedArtifacts = useStore((s) => s.placedArtifacts);
+  const addPlacedArtifact = useStore((s) => s.addPlacedArtifact);
+  const updatePlacedArtifact = useStore((s) => s.updatePlacedArtifact);
+  const removePlacedArtifact = useStore((s) => s.removePlacedArtifact);
+  const postSource = useStore((s) => s.postSource);
+  const setPostSource = useStore((s) => s.setPostSource);
+  const postImage = useStore((s) => s.postImage);
+  const postImageCaption = useStore((s) => s.postImageCaption);
+  const setPostImage = useStore((s) => s.setPostImage);
   const logValeRequest = useStore((s) => s.logValeRequest);
   const setReachAndCred = useStore((s) => s.setReachAndCred);
   const reach = useStore((s) => s.reach);
@@ -22,21 +32,31 @@ export default function Phase2({ onPublished }) {
   const step = useStore((s) => s.composerStep);
   const setStep = useStore((s) => s.setComposerStep);
 
-  const [tab, setTab] = useState("va"); // va | el
+  const [tab, setTab] = useState("va"); // va | el | pr | co
   const [headline, setHeadline] = useState("Council reviews reservoir treatment schedule");
   const [headlineSwapping, setHeadlineSwapping] = useState(false);
   const [messages, setMessages] = useState([]);
   const [options, setOptions] = useState([]);
   const [selectedOption, setSelectedOption] = useState(0);
   const [why, setWhy] = useState({ n: "", why: "Tap a signal to see why it works, then drag it onto the post." });
-  const [placed, setPlaced] = useState([]);
   const [hot, setHot] = useState(false);
   const [showSpread, setShowSpread] = useState(false);
+  const [selectedUid, setSelectedUid] = useState(null);
+  const [imagePickerOpen, setImagePickerOpen] = useState(false);
+
+  // Contribute tool's draft — lifted here (rather than owned by ContributePanel)
+  // so the shared canvas on the left can show it live while that tab is active,
+  // the same way it shows the Vale-edited campaign draft the rest of the time.
+  const [coSource, setCoSource] = useState("");
+  const [coHeadline, setCoHeadline] = useState("");
+  const [coImage, setCoImage] = useState(CONTRIBUTE_IMAGES[0][1]);
+  const [coImageLabel, setCoImageLabel] = useState(CONTRIBUTE_IMAGES[0][0]);
 
   const canvasRef = useRef(null);
   const dragRef = useRef(null);
 
   const cred = Math.min(100, artifacts.reduce((sum, id) => sum + ARTS.find((a) => a.id === id).w, 0));
+  const isCampaignTab = tab !== "co";
 
   const swapHeadline = (text) => {
     setHeadlineSwapping(true);
@@ -79,25 +99,53 @@ export default function Phase2({ onPublished }) {
     }, 620);
   };
 
-  // drag-to-canvas for artifact palette
+  // Typed directly on the canvas — no fade transition, just a live edit.
+  const editHeadline = (text) => {
+    setHeadline(text);
+    setCampaignField("head", text);
+  };
+  const editSource = (text) => setPostSource(text);
+
+  const selectArtifact = (uid) => {
+    setSelectedUid(uid);
+    setTab("pr");
+  };
+  const deselect = () => setSelectedUid(null);
+
+  const pickImage = (grad, label) => {
+    setPostImage(grad, label);
+    setImagePickerOpen(false);
+  };
+
+  // drag-to-canvas for the artifact palette, plus dragging already-placed
+  // signals around the post — two modes, matching phase2-composer-properties.html.
   useEffect(() => {
     const move = (e) => {
       const drag = dragRef.current;
       if (!drag || !canvasRef.current) return;
       const r = canvasRef.current.getBoundingClientRect();
-      setHot(e.clientX > r.left && e.clientX < r.right && e.clientY > r.top && e.clientY < r.bottom);
+      if (drag.mode === "new") {
+        setHot(e.clientX > r.left && e.clientX < r.right && e.clientY > r.top && e.clientY < r.bottom);
+      } else if (drag.mode === "move") {
+        const x = Math.max(0, Math.min(e.clientX - r.left - drag.offsetX, r.width - 30));
+        const y = Math.max(0, Math.min(e.clientY - r.top - drag.offsetY, r.height - 20));
+        updatePlacedArtifact(drag.uid, { x, y });
+      }
     };
     const up = (e) => {
       const drag = dragRef.current;
       if (!drag || !canvasRef.current) return;
-      const r = canvasRef.current.getBoundingClientRect();
-      if (e.clientX > r.left && e.clientX < r.right && e.clientY > r.top && e.clientY < r.bottom) {
-        const x = Math.max(4, Math.min(e.clientX - r.left - 24, r.width - 100));
-        const y = Math.max(4, Math.min(e.clientY - r.top - 12, r.height - 28));
-        setPlaced((p) => [...p, { uid: `${drag.id}-${Date.now()}`, art: drag, x, y }]);
-        addArtifact(drag.id);
+      if (drag.mode === "new") {
+        const r = canvasRef.current.getBoundingClientRect();
+        if (e.clientX > r.left && e.clientX < r.right && e.clientY > r.top && e.clientY < r.bottom) {
+          const x = Math.max(4, Math.min(e.clientX - r.left - 24, r.width - 100));
+          const y = Math.max(4, Math.min(e.clientY - r.top - 12, r.height - 28));
+          const uid = `${drag.art.id}-${Date.now()}`;
+          addPlacedArtifact({ uid, id: drag.art.id, x, y, scale: 1, rotation: 0, opacity: 100, text: drag.art.h });
+          selectArtifact(uid);
+        }
+        setHot(false);
       }
-      setHot(false);
       dragRef.current = null;
     };
     window.addEventListener("pointermove", move);
@@ -109,6 +157,14 @@ export default function Phase2({ onPublished }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const onArtifactPointerDown = (uid, e) => {
+    const item = placedArtifacts.find((p) => p.uid === uid);
+    if (!item || !canvasRef.current) return;
+    const r = canvasRef.current.getBoundingClientRect();
+    dragRef.current = { mode: "move", uid, offsetX: e.clientX - r.left - item.x, offsetY: e.clientY - r.top - item.y };
+    selectArtifact(uid);
+  };
+
   const launch = () => {
     const topId = [...artifacts].sort((x, y) => ARTS.find((a) => a.id === y).w - ARTS.find((a) => a.id === x).w)[0];
     const topArt = ARTS.find((a) => a.id === topId);
@@ -116,6 +172,16 @@ export default function Phase2({ onPublished }) {
     setReachAndCred(reach, cred, topArt.n);
     setShowSpread(true);
   };
+
+  const selected = placedArtifacts.find((p) => p.uid === selectedUid) || null;
+
+  const imagePickerJsx = imagePickerOpen ? (
+    <div className="img-picker" onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()}>
+      {CONTRIBUTE_IMAGES.map(([name, grad]) => (
+        <button key={name} className="img-picker-sw" style={{ background: grad }} aria-label={name} onClick={() => pickImage(grad, name)} />
+      ))}
+    </div>
+  ) : null;
 
   return (
     <section id="p2" className="scr">
@@ -136,11 +202,41 @@ export default function Phase2({ onPublished }) {
 
       {step === "composer" && (
         <div className="composer">
-          <PostCanvas ref={canvasRef} headline={headline} headlineSwapping={headlineSwapping} hot={hot} placed={placed} />
+          <PostCanvas
+            ref={canvasRef}
+            hot={hot}
+            editable={isCampaignTab}
+            selectedUid={selectedUid}
+            onArtifactPointerDown={onArtifactPointerDown}
+            onCanvasPointerDown={deselect}
+            {...(tab === "co"
+              ? {
+                  source: coSource || "Add a source name",
+                  headline: coHeadline || "Write a headline to see it here",
+                  headlineSwapping: false,
+                  image: coImage,
+                  imageCaption: coImageLabel,
+                  placed: [],
+                }
+              : {
+                  source: postSource,
+                  onSourceChange: editSource,
+                  headline,
+                  headlineSwapping,
+                  onHeadlineChange: editHeadline,
+                  image: postImage,
+                  imageCaption: postImageCaption,
+                  onImageClick: () => setImagePickerOpen((o) => !o),
+                  imagePicker: imagePickerJsx,
+                  placed: placedArtifacts,
+                })}
+          />
           <div className="composer-tools">
             <div className="tabs">
               <button className={`tab ${tab === "va" ? "on" : ""}`} onClick={() => setTab("va")}>Vale</button>
               <button className={`tab ${tab === "el" ? "on" : ""}`} onClick={() => setTab("el")}>Signals</button>
+              <button className={`tab ${tab === "pr" ? "on" : ""}`} onClick={() => setTab("pr")}>Props</button>
+              <button className={`tab ${tab === "co" ? "on" : ""}`} onClick={() => setTab("co")}>Contribute</button>
             </div>
             {tab === "va" && (
               <ValeChat
@@ -155,10 +251,25 @@ export default function Phase2({ onPublished }) {
               <div className="tp on" id="t-el">
                 <ArtifactPalette
                   onShowWhy={(a) => setWhy({ n: a.n, why: a.why })}
-                  onDragStart={(a) => { dragRef.current = a; }}
+                  onDragStart={(a) => { dragRef.current = { mode: "new", art: a }; }}
                 />
                 <div className="why"><b>{why.n || "What this does"}</b>{why.why}</div>
               </div>
+            )}
+            {tab === "pr" && (
+              <PropertiesPanel
+                selected={selected}
+                onUpdate={(patch) => updatePlacedArtifact(selectedUid, patch)}
+                onRemove={() => { removePlacedArtifact(selectedUid); setSelectedUid(null); }}
+              />
+            )}
+            {tab === "co" && (
+              <ContributePanel
+                source={coSource} setSource={setCoSource}
+                headline={coHeadline} setHeadline={setCoHeadline}
+                image={coImage} setImage={setCoImage}
+                imageLabel={coImageLabel} setImageLabel={setCoImageLabel}
+              />
             )}
           </div>
           <CredibilityMeter cred={cred} onLaunch={launch} disabled={artifacts.length === 0} />

@@ -17,13 +17,17 @@ src/
   App.jsx                Top-level phase router + background-transition orchestration
   store.js               Zustand store — round/decisions/campaign/artifacts/vale log/reach
   data/posts.js           All fixed content: R1/R2 post arrays, artifact defs, Vale's
-                          headline options and rewrite rules, audience-match table
-  services/valeService.js Vale's response logic, isolated behind getValeResponse()
+                          headline options and rewrite rules, audience-match table,
+                          tactic taxonomy + genuine templates + image gallery for Contribute
+  services/
+    valeService.js         Vale's response logic, isolated behind getValeResponse()
+    communityPool.js        localStorage-backed pool for Contribute-tab submissions
   components/
     Navbar.jsx
     Intro.jsx / Interstitial.jsx / Profile.jsx
     phase1/*               FeedHeader, SwipeCard, ActionBar, VerifyButton, ReasonSheet, VerifySheet
-    phase2/*               CampaignSetup, PostCanvas, ValeChat, ArtifactPalette, CredibilityMeter, SpreadView
+    phase2/*               CampaignSetup, PostCanvas, ValeChat, ArtifactPalette, CredibilityMeter,
+                            SpreadView, ContributePanel (build a post → community pool)
     phase3/*               Phase3.jsx renders all 7 beats inline (each beat is a small
                             local component in the same file — they're one-off, not reused)
   styles/
@@ -77,6 +81,13 @@ type State = {
 
 No component should need to change — they only ever call `getValeResponse()` / `getOpeningOptions()` / `getAudienceMatch()`.
 
+## Two deliberate spec deviations: image upload and the community pool
+
+A teammate built a separate prototype ("Live Scan") with a Phase 2 whiteboard tool that let learners upload photos and submit posts to a shared feed backed by `window.storage` — an API that only exists inside Claude's own Artifacts sandbox, not a real browser. Both features were folded into this app's Contribute tab (`src/components/phase2/ContributePanel.jsx`), with two conscious changes from how they were originally built and one from the original spec:
+
+- **Image upload** (`src/components/phase2/ContributePanel.jsx`) is explicitly listed as out of scope in `SPEC.md` §8. It was added anyway, at the team's explicit request, with the same client-side compression approach as the original (canvas resize to 320px wide, JPEG @ 0.6 quality) so a photo never bloats `localStorage`. Worth knowing: this quietly weakens the ethics claim the deck leans on — *"a manipulation sandbox that cannot produce a usable fake"* — since a learner can now attach a real photo to a fake headline. Flag this before the ethics slide is finalized.
+- **The shared pool** (`src/services/communityPool.js`) doesn't call any backend — `window.storage` was replaced with `localStorage`, scoped to a single browser. Posts a learner submits reappear mixed into **that same browser's next Round 2** (`store.js`'s `startRoundTwo()` merges the pool with the fixed Eastvale set, shuffles, and caps at 5). Round 1 is never touched by the pool — it has to stay a fixed, unpolluted baseline for the before/after accuracy number the whole app is built around. A real cross-user shared feed (what the original prototype's storage API implied) would need an actual database, which §8 rules out; if the team wants that later, it's a real scope increase, not a tweak.
+
 ## What's deliberately not here
 
-Auth, accounts, a database, image upload/generation, layers, undo — all explicitly out of scope per `SPEC.md` §8. This is a filmed prototype: "build only what the camera needs to see."
+Auth, accounts, a real (cross-user) database, image generation, layers, undo — all explicitly out of scope per `SPEC.md` §8. This is a filmed prototype: "build only what the camera needs to see."

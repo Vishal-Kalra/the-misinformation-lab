@@ -16,7 +16,12 @@
 // back to that cache on network failure so a filmed demo never waits on an API call.
 // Component code should not need to change — it only calls getValeResponse().
 
-import { HEADS, RULES, MATCH, HOOKNAME } from "../data/posts";
+import {
+  HEADS, RULES, MATCH, HOOKNAME, GENUINE_TEMPLATES,
+  HOOK_CLAUSES, SOURCE_SUGGESTIONS, VISUAL_THEMES, VISUAL_THEME_DEFAULT,
+} from "../data/posts";
+
+const randomFrom = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
 export function getAudienceMatch(aud, hook) {
   if (!aud || !hook) return 0;
@@ -60,4 +65,32 @@ export function getValeResponse(userText) {
       why: rule.s,
     },
   };
+}
+
+// Job 4 (Contribute tool): generate a fake post by explicit tactic (with an
+// optional emotional hook for extra flavor), or a genuine one — still
+// rule-based, so it works with no API key. Templates are picked at random for
+// variety across repeated uses. If no source was typed in, a plausible one
+// is suggested too, mirroring the reference prototype's "AI fills in both
+// fields" behaviour without a live model call.
+export function generateForTactic(tactic, { source, hook } = {}) {
+  const finalSource = source || randomFrom(SOURCE_SUGGESTIONS.fake);
+  const template = randomFrom(tactic.templates);
+  let headline = template({ source: finalSource });
+  if (hook && HOOK_CLAUSES[hook]) headline += HOOK_CLAUSES[hook]({ source: finalSource });
+  return { headline, why: tactic.why, source: finalSource };
+}
+
+export function generateGenuine({ source } = {}) {
+  const finalSource = source || randomFrom(SOURCE_SUGGESTIONS.genuine);
+  const template = randomFrom(GENUINE_TEMPLATES);
+  return { headline: template({ source: finalSource }), source: finalSource };
+}
+
+// Job 5 (Contribute tool "AI Visual"): keyword-match the headline to a
+// themed gradient instead of calling an image-generation API.
+export function generateVisualTheme(headline) {
+  const lower = (headline || "").toLowerCase();
+  const theme = VISUAL_THEMES.find((t) => t.k.some((kw) => lower.includes(kw)));
+  return theme || VISUAL_THEME_DEFAULT;
 }

@@ -4,7 +4,10 @@ import { ARTS } from "../data/posts";
 
 export default function Profile({ onTakeRoundTwo, onSeeResult }) {
   const campaign = useStore((s) => s.campaign);
-  const artifacts = useStore((s) => s.artifacts);
+  const placedArtifacts = useStore((s) => s.placedArtifacts);
+  const postSource = useStore((s) => s.postSource);
+  const postImage = useStore((s) => s.postImage);
+  const postImageCaption = useStore((s) => s.postImageCaption);
   const reach = useStore((s) => s.reach);
   const cred = useStore((s) => s.cred);
   const r1 = useStore((s) => s.r1);
@@ -25,8 +28,6 @@ export default function Profile({ onTakeRoundTwo, onSeeResult }) {
     }, 120);
     return () => clearTimeout(t);
   }, [acc1, acc2]);
-
-  const placedArts = artifacts.map((id) => ARTS.find((a) => a.id === id));
 
   return (
     <section id="prof" className="scr">
@@ -55,18 +56,19 @@ export default function Profile({ onTakeRoundTwo, onSeeResult }) {
           <div className="cmeta">
             <div className="av" style={{ background: "linear-gradient(135deg,#C3AFD9,#7C63A8)" }} />
             <div>
-              <div className="nm">Riverton Daily Report</div>
-              <div className="sb">just now · Sponsored</div>
+              <div className="nm">{postSource}</div>
+              <div className="sb">Published just now</div>
             </div>
           </div>
           <div className="ctxt" style={{ fontWeight: 600 }}>{campaign.head}</div>
-          <div className="cimg" style={{ background: "linear-gradient(150deg,#9DB4D6,#6E88B4)", minHeight: 112 }}>
-            <em>Riverton reservoir</em>
+          <div className="cimg" style={{ background: postImage || "linear-gradient(150deg,#9DB4D6,#6E88B4)", minHeight: 112 }}>
+            <em>{postImageCaption}</em>
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 5, padding: "9px 14px 0" }}>
-            {placedArts.map((a, idx) => (
-              <span key={idx} className={`art ${a.cls}`} style={{ position: "static" }}>{a.h}</span>
-            ))}
+            {placedArtifacts.map((p) => {
+              const a = ARTS.find((x) => x.id === p.id);
+              return <span key={p.uid} className={`art ${a.cls}`} style={{ position: "static" }}>{p.text}</span>;
+            })}
           </div>
           <div className="ceng">
             <span>{Math.round(reach * 0.28).toLocaleString()} reactions</span>

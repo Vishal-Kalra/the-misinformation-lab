@@ -14,7 +14,7 @@ What each screen does, in the order a learner hits them. Section numbers referen
 - **Decision time is logged in milliseconds** from the moment the card appears to the moment you commit — this is the data Phase 3's "decision speed" beat is built from.
 - Flagging a post opens a **reason sheet** (fake source / false context / misleading numbers / emotional pull) — this is what proves you actually engaged rather than guessing.
 - **Verify tools**: optional sheet showing outlet registration, first-published date, and when the image was first seen — real signal, no verdict. Opening it is itself logged (`verified: true` on the decision) and costs you time.
-- Round 2 uses a **different fictional town** (Eastvale, not Riverton) with the **same four manipulation tactics**, so improvement measures tactic recognition rather than memorized answers (§7).
+- Round 2 uses a **different fictional town** (Eastvale, not Riverton) with the **same four manipulation tactics**, so improvement measures tactic recognition rather than memorized answers (§7). If you've submitted posts through Phase 2's Contribute tab in an earlier session on this browser, Round 2 mixes up to a few of them in (shuffled, still capped at 5 total). **Round 1 never changes** — it's the fixed baseline everything else is measured against.
 
 ## Phase 2 — Campaign (Composer)
 
@@ -26,6 +26,22 @@ What each screen does, in the order a learner hits them. Section numbers referen
 - **Credibility signal artifacts** (Verified tick, Breaking label, "N friends shared this", named source, engagement numbers) — drag from the palette onto the post canvas. Each one explains *why* it works when you hover/select it.
 - **Credibility meter** — sum of dropped artifacts' weights, capped at 100%.
 - **Launch**: computes reach as `2,400 × audience-match% × credibility% × 8`, shown on screen with its own arithmetic (not hidden), then animates a network-spread visualization on canvas. ~15% of nodes deliberately stay unreached — a post that reaches everyone would look invented.
+
+### Contribute tab (extra — not in the original build spec)
+
+A third tab alongside Vale and Signals, ported from a teammate's prototype. Lets a learner build an *additional* post — outside their scored campaign — and submit it to a **local community pool**:
+
+- Toggle between **Misinformation** (pick one of the four named tactics: fake source, false context, misleading numbers, emotional manipulation, each paired with an optional emotional hook — fear/outrage/belonging/pride) and **Genuine post**.
+- **Generate with Vale** fills in *both* a headline and — if you left it blank — a plausible source name, from the same rule-based engine as the main composer. No live API call.
+- **Clear** resets the whole draft in one click.
+- **Image**: pick from the curated illustrated set, **✦ AI Visual** (keyword-matches your headline to a themed gradient — still no image-generation API, still never photoreal), or **upload your own photo** (compressed client-side before storage).
+- **Submit to community pool** saves the post to `localStorage`.
+
+Two deliberate deviations from `SPEC.md` §8, made at the team's request — see `docs/TECH_STACK.md` for the reasoning:
+1. Image upload is explicitly listed as out of scope in the original spec.
+2. The "shared feed" this was modeled on needed a real backend (`window.storage` in the reference prototype only exists inside Claude's own sandbox). This local-only version reuses the same UX without one.
+
+Posts submitted here are mixed into a **future Round 2** on the same browser (never Round 1 — see below), shuffled in with the fixed Eastvale set and capped at 5 posts total.
 
 ## Profile
 

@@ -159,3 +159,110 @@ export const PROFILE = {
 };
 
 export const AUD_BASE = 2400;
+
+// --- Contribute tool (Phase 2 "Contribute" tab) -----------------------------
+// Lets a learner build an extra post — fake (by explicit tactic) or genuine —
+// that gets saved to the local community pool and mixed into a future
+// session's Round 2 feed. See src/services/communityPool.js.
+
+// The four tactics named throughout SPEC.md §7, each with a couple of
+// fill-in-the-blank headline templates and the explanation Vale/the debrief
+// gives for that tactic. `signals` maps to the ARTS credibility signals a
+// real version of this tactic tends to lean on (used for Phase 3's
+// signal-matching beat).
+export const TACTICS = [
+  {
+    id: "fake-source",
+    label: "Fake source",
+    signals: ["Source", "Verified"],
+    why: "A fabricated or impersonated outlet, counting on you not checking who's actually talking.",
+    templates: [
+      (s) => `${s.source || "An unregistered outlet"} reports the council quietly changed the policy — no one else has confirmed it.`,
+      (s) => `Breaking from ${s.source || "a source nobody's heard of"}: officials aren't commenting, which "says everything."`,
+    ],
+  },
+  {
+    id: "false-context",
+    label: "False context",
+    signals: ["Verified"],
+    why: "A real image or fact, reframed with a caption that changes what it appears to prove.",
+    templates: [
+      (s) => `This photo${s.source ? ` from ${s.source}` : ""} is being shared as if it's from this week — it's actually years old.`,
+      (s) => `Same picture, new caption: what was routine last year is being sold as urgent now.`,
+    ],
+  },
+  {
+    id: "misleading-numbers",
+    label: "Misleading numbers",
+    signals: ["Numbers", "Breaking"],
+    why: "A real number, presented without the baseline that would make it unremarkable.",
+    templates: [
+      (s) => `${s.source || "A new report"} claims cases are up 300% — the baseline it's measured against is never shown.`,
+      (s) => `The chart looks alarming until you notice the axis doesn't start at zero.`,
+    ],
+  },
+  {
+    id: "emotional-manipulation",
+    label: "Emotional manipulation",
+    signals: ["Breaking", "Friends"],
+    why: "No real claim being made — just urgency and a feeling engineered to make you share before you check.",
+    templates: [
+      (s) => `Share before this gets taken down — ${s.source || "someone"} doesn't want you seeing this.`,
+      (s) => `Everyone in the area is already talking about this. If you haven't heard, you're behind.`,
+    ],
+  },
+];
+
+// A learner can also practice writing something accurate — dull, checkable,
+// generic. No invented statistics or named studies (those could themselves
+// be mistaken for misinformation), matching the same rule genuine posts
+// follow throughout R1/R2.
+export const GENUINE_TEMPLATES = [
+  (s) => `${s.source || "Community notice"}: routine maintenance is scheduled for this week — no action needed.`,
+  (s) => `${s.source || "Public notice"}: the consultation period is open until Friday; details are on the official site.`,
+  (s) => `${s.source || "Local update"}: office hours are extended this month. No appointment necessary.`,
+];
+
+// Optional emotional-hook flavor for fake posts in the Contribute tool —
+// reuses the same four hooks as Phase 2's main campaign (HOOKNAME above) so
+// the vocabulary stays consistent across the app. Appended to a generated
+// headline as a short clause, the way Vale's own rewrites lean on a hook.
+export const HOOK_CLAUSES = {
+  fear: () => ` — nobody will say why it's being kept quiet.`,
+  outrage: () => `, and nobody has been held accountable.`,
+  belonging: () => ` — everyone nearby already knows.`,
+  pride: () => `, if you know where to actually look.`,
+};
+
+// Plausible source names to suggest when the Contribute tool's source field
+// is left blank at generate-time — mirrors "Generate with AI" filling in
+// both fields in the reference prototype, without a live model call.
+export const SOURCE_SUGGESTIONS = {
+  fake: ["Daily Report", "Herald Online", "TruthMetrics Daily", "Community Signal", "@local_insider", "Weekly Bulletin"],
+  genuine: ["Community Notice", "Public Health Notice", "Town Community Board", "Local Services Update"],
+};
+
+// Rule-based "AI Visual" — keyword-matches the headline to a themed gradient
+// instead of calling an image-generation API (SPEC.md §7: no image
+// generation, illustrated set only). Same mechanism as Vale's RULES above,
+// applied to picking a visual rather than rewriting text.
+export const VISUAL_THEMES = [
+  { k: ["water", "reservoir", "drink", "pipe"], grad: "linear-gradient(150deg,#9DB4D6,#6E88B4)", label: "Water" },
+  { k: ["money", "fund", "cost", "budget", "bonus"], grad: "linear-gradient(150deg,#E0BBA8,#C08E76)", label: "Finance" },
+  { k: ["school", "kid", "child", "student", "meal"], grad: "linear-gradient(150deg,#C3AFD9,#9179B6)", label: "School" },
+  { k: ["health", "doctor", "clinic", "medical", "symptom"], grad: "linear-gradient(150deg,#A9C4B6,#7A9E8C)", label: "Health" },
+  { k: ["crime", "danger", "safety", "police", "risk"], grad: "linear-gradient(150deg,#D9A8A8,#B47474)", label: "Safety" },
+  { k: ["chart", "number", "stat", "percent", "data"], grad: "linear-gradient(150deg,#CFC6A8,#A69874)", label: "Chart" },
+];
+export const VISUAL_THEME_DEFAULT = { grad: "linear-gradient(150deg,#CFCFD6,#9E9EA8)", label: "General" };
+
+// Curated illustrated backgrounds for the Contribute tool's image picker —
+// same "no photoreal imagery" rule as the rest of the app (SPEC.md §7).
+export const CONTRIBUTE_IMAGES = [
+  ["Reservoir", "linear-gradient(150deg,#9DB4D6,#6E88B4)"],
+  ["Town hall", "linear-gradient(150deg,#D8C6A8,#B49B74)"],
+  ["Crowd", "linear-gradient(150deg,#C3AFD9,#9179B6)"],
+  ["Pipework", "linear-gradient(150deg,#A9C4B6,#7A9E8C)"],
+  ["Street", "linear-gradient(150deg,#CFCFD6,#9E9EA8)"],
+  ["Chart", "linear-gradient(150deg,#E0BBA8,#C08E76)"],
+];
