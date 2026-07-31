@@ -198,15 +198,46 @@ function BeatVulnerability({ campaign }) {
   );
 }
 
+const REASONS = [
+  { label: "The source isn't real", value: "Fake source" },
+  { label: "Real image, wrong story", value: "False context" },
+  { label: "The numbers are bent", value: "Misleading numbers" },
+  { label: "Built to make me feel something", value: "Emotional pull" },
+];
+
 function BeatDebrief({ data }) {
   const { A } = data;
+  const [picked, setPicked] = useState({});
   return (
     <>
       <p className="lede">All ten posts, explained.</p>
       {A.map((d, i) => (
         <div key={i} className="debrow">
           <span className="debidx">{String(i + 1).padStart(2, "0")}</span>
-          <span className="debtxt">{d.name}<span className="debwhy">{d.why}</span></span>
+          <span className="debtxt">
+            {d.name}
+            <span className="debwhy">{d.why}</span>
+            {d.action === "flag" && (
+              <span className="debreason">
+                <span className="debreasonq">In hindsight, why did you flag it?</span>
+                <span className="chips">
+                  {REASONS.map((r) => (
+                    <button
+                      key={r.value}
+                      type="button"
+                      className={`chip ${picked[i] === r.value ? "hit" : ""}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setPicked((p) => ({ ...p, [i]: r.value }));
+                      }}
+                    >
+                      {r.label}
+                    </button>
+                  ))}
+                </span>
+              </span>
+            )}
+          </span>
         </div>
       ))}
     </>

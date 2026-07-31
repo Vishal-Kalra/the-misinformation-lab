@@ -11,6 +11,13 @@ import CredibilityMeter from "./CredibilityMeter";
 import SpreadView from "./SpreadView";
 import ContributePanel from "./ContributePanel";
 
+const TAB_HINTS = {
+  va: "Chat with Vale to rewrite your headline for the audience you picked.",
+  el: "Drag a signal onto your post — each one raises the credibility score below.",
+  pr: "Adjust the signal you placed, or select another one on the post to edit it.",
+  co: "Optional — submit your own post idea into next round's feed.",
+};
+
 export default function Phase2({ onPublished }) {
   const campaign = useStore((s) => s.campaign);
   const setCampaignField = useStore((s) => s.setCampaignField);
@@ -238,6 +245,7 @@ export default function Phase2({ onPublished }) {
               <button className={`tab ${tab === "pr" ? "on" : ""}`} onClick={() => setTab("pr")}>Props</button>
               <button className={`tab ${tab === "co" ? "on" : ""}`} onClick={() => setTab("co")}>Contribute</button>
             </div>
+            <p className="tab-hint">{TAB_HINTS[tab]}</p>
             {tab === "va" && (
               <ValeChat
                 messages={messages}

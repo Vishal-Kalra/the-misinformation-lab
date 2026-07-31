@@ -36,6 +36,8 @@
 .debidx { font-family: var(--mono); font-size: 10px; color: var(--p3mute); width: 16px; flex: none; padding-top: 2px; }
 .debtxt { font-size: 13px; line-height: 1.4; }
 .debwhy { display: block; font-size: 11.5px; color: var(--p3mute); margin-top: 3px; font-style: italic; }
+.debreason { display: block; margin-top: 9px; }
+.debreasonq { display: block; font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--p3mute); margin-bottom: 6px; }
 
 /* Desktop: read like a printed report laid out on a page, not a phone screen. */
 @media (min-width: 700px) {

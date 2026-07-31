@@ -4,7 +4,6 @@ import FeedHeader from "./FeedHeader";
 import SwipeCard from "./SwipeCard";
 import ActionBar from "./ActionBar";
 import VerifyButton from "./VerifyButton";
-import ReasonSheet from "./ReasonSheet";
 import VerifySheet from "./VerifySheet";
 
 export default function Phase1({ onRoundOneDone, onRoundTwoDone }) {
@@ -17,10 +16,8 @@ export default function Phase1({ onRoundOneDone, onRoundTwoDone }) {
   const [locked, setLocked] = useState(false);
   const [verified, setVerified] = useState(false);
   const [flyDir, setFlyDir] = useState(null);
-  const [reasonOpen, setReasonOpen] = useState(false);
   const [verifyOpen, setVerifyOpen] = useState(false);
   const t0 = useRef(0);
-  const pendingMs = useRef(0);
 
   const post = posts[i];
 
@@ -28,7 +25,6 @@ export default function Phase1({ onRoundOneDone, onRoundTwoDone }) {
     setLocked(false);
     setVerified(false);
     setFlyDir(null);
-    setReasonOpen(false);
     setVerifyOpen(false);
     t0.current = performance.now();
   }, [i, round]);
@@ -63,20 +59,8 @@ export default function Phase1({ onRoundOneDone, onRoundTwoDone }) {
     if (locked || !post) return;
     setLocked(true);
     const ms = Math.round(performance.now() - t0.current);
-    if (action === "flag") {
-      setFlyDir(-1);
-      pendingMs.current = ms;
-      setReasonOpen(true);
-    } else {
-      setFlyDir(1);
-      record("trust", null, ms);
-      goNext();
-    }
-  };
-
-  const handleReason = (reason) => {
-    setReasonOpen(false);
-    record("flag", reason, pendingMs.current);
+    setFlyDir(action === "flag" ? -1 : 1);
+    record(action, null, ms);
     goNext();
   };
 
@@ -111,7 +95,6 @@ export default function Phase1({ onRoundOneDone, onRoundTwoDone }) {
       <ActionBar onFlag={() => decide("flag")} onTrust={() => decide("trust")} disabled={locked} />
       <VerifyButton onClick={handleVerify} disabled={locked} />
       <p className="hint">Swipe the card, or use the buttons</p>
-      <ReasonSheet open={reasonOpen} onSelect={handleReason} />
       <VerifySheet open={verifyOpen} post={post} onClose={() => setVerifyOpen(false)} />
     </section>
   );

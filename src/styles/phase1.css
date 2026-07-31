@@ -31,8 +31,6 @@
 .sheet.up { transform: none; }
 .sheet h4 { margin: 0 0 3px; font-size: 15px; font-weight: 600; }
 .sheet .s { margin: 0 0 14px; font-size: 12px; color: var(--p1mute); }
-.opt { display: block; width: 100%; text-align: left; padding: 12px 13px; margin-bottom: 8px; border: 1px solid var(--p1line); border-radius: 10px; background: var(--p1card); font-size: 13.5px; color: var(--p1ink); }
-.opt:hover { border-color: var(--p1act); }
 .vrow { display: flex; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid var(--p1line); font-size: 13px; }
 .vrow:last-of-type { border-bottom: none; }
 .vrow span:last-child { color: var(--p1mute); font-family: var(--mono); font-size: 12px; }
