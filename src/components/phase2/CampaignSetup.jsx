@@ -1,6 +1,6 @@
 import { MATCH } from "../../data/posts";
 
-export default function CampaignSetup({ aud, hook, onAud, onHook, onOpenStrategist }) {
+export default function CampaignSetup({ aud, hook, onAud, onHook, onOpenStrategist, onManual }) {
   const match = aud && hook ? MATCH[aud][hook] : 0;
 
   return (
@@ -26,8 +26,17 @@ export default function CampaignSetup({ aud, hook, onAud, onHook, onOpenStrategi
         <span className="mb"><i style={{ background: "var(--p2act)", width: match + "%" }} /></span>
         <span className="mv">{match ? match + "%" : "—"}</span>
       </div>
+
+      {/* Two ways in — Vale writes the opening draft for you, or you start
+          from a blank post and write it yourself. Both land in the same
+          composer with the same tools available afterward; this only
+          decides how the first draft gets written. */}
+      <span className="lab">How do you want to build it?</span>
       <button className="pbtn" disabled={!match} onClick={onOpenStrategist}>
-        Open the strategist
+        Let Vale write it
+      </button>
+      <button className="pbtn pbtn-ghost" disabled={!match} onClick={onManual}>
+        Write it yourself
       </button>
     </div>
   );

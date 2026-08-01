@@ -1,11 +1,11 @@
 import { create } from "zustand";
-import { R1, R2 } from "./data/posts";
+import { SEED_POSTS } from "./data/posts";
 import { getPool } from "./services/communityPool";
 
-// State shape matches SPEC.md §4:
+// State shape — one round now, no Round 1 / Round 2 split:
 // Decision { i, action, reason, ms, verified, correct, fake, name, why, signals }
 // Campaign { aud, hook, head, match }
-// State { round, i, r1, r2, campaign, artifacts, valeLog, reach, cred }
+// State { i, decisions, feed, campaign, artifacts, valeLog, reach, cred }
 
 function shuffle(arr) {
   const a = [...arr];
@@ -17,12 +17,10 @@ function shuffle(arr) {
 }
 
 export const useStore = create((set, get) => ({
-  phase: "intro", // intro | phase1 | interstitial | phase2 | profile | phase3
-  round: 1,
+  phase: "intro", // intro | phase1 | phase2 | profile | phase3
   i: 0,
-  r1: [],
-  r2: [],
-  r2Feed: null, // computed once when round 2 starts — base R2 + local community pool, shuffled, capped at 5
+  decisions: [],
+  feed: null, // this session's random 5 — set once by startPhase1()
   campaign: { aud: "", hook: "", head: "", match: 0 },
   artifacts: [], // §4 canonical: flat array of artifact ids, one entry per placement — drives credibility/reach math
   // Rich per-placement visual data for the canvas (position/scale/rotation/opacity/custom text) —
@@ -38,28 +36,26 @@ export const useStore = create((set, get) => ({
   cred: 0,
   topArtifact: null,
   composerStep: "setup", // setup | composer — lifted so the navbar's back button can drive it
+  reflected: false, // has this session been through Phase 3 yet — just for the profile/navbar breadcrumb
 
-  posts: () => (get().round === 1 ? R1 : get().r2Feed || R2),
-  currentRoundDecisions: () => (get().round === 1 ? get().r1 : get().r2),
+  posts: () => get().feed || [],
 
   setPhase: (phase) => set({ phase }),
   setComposerStep: (composerStep) => set({ composerStep }),
+  markReflected: () => set({ reflected: true }),
 
-  recordDecision: (decision) => {
-    const key = get().round === 1 ? "r1" : "r2";
-    set((s) => ({ [key]: [...s[key], decision] }));
-  },
+  recordDecision: (decision) => set((s) => ({ decisions: [...s.decisions, decision] })),
 
   advancePost: () => set((s) => ({ i: s.i + 1 })),
 
-  // Round 1 is always the untouched baseline (its accuracy is the "before"
-  // number Phase 3 measures against) — community posts only ever mix into
-  // Round 2, so submitting a post can't distort the measurement it's later
-  // compared to.
-  startRoundTwo: () => {
+  // Draws this session's one Phase 1 round: a random 5 from the fixed seed
+  // content plus whatever other learners (or this learner, in an earlier
+  // session) have published in Phase 2 — see services/communityPool.js.
+  // Replaces the old fixed Round 1 / Round 2 split entirely.
+  startPhase1: () => {
     const pool = getPool();
-    const feed = pool.length ? shuffle([...R2, ...pool]).slice(0, 5) : R2;
-    set({ round: 2, i: 0, r2Feed: feed });
+    const feed = shuffle([...SEED_POSTS, ...pool]).slice(0, 5);
+    set({ phase: "phase1", i: 0, decisions: [], feed });
   },
 
   setCampaignField: (field, value) =>
@@ -99,11 +95,9 @@ export const useStore = create((set, get) => ({
   reset: () =>
     set({
       phase: "intro",
-      round: 1,
       i: 0,
-      r1: [],
-      r2: [],
-      r2Feed: null,
+      decisions: [],
+      feed: null,
       campaign: { aud: "", hook: "", head: "", match: 0 },
       artifacts: [],
       placedArtifacts: [],
@@ -115,6 +109,7 @@ export const useStore = create((set, get) => ({
       cred: 0,
       topArtifact: null,
       composerStep: "setup",
+      reflected: false,
     }),
 }));
 

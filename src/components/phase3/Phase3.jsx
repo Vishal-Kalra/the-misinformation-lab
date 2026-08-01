@@ -3,8 +3,7 @@ import { useStore, accuracyPct } from "../../store";
 import { ARTS, HOOKNAME, PROFILE } from "../../data/posts";
 
 export default function Phase3({ onDone }) {
-  const r1 = useStore((s) => s.r1);
-  const r2 = useStore((s) => s.r2);
+  const decisions = useStore((s) => s.decisions);
   const valeLog = useStore((s) => s.valeLog);
   const artifacts = useStore((s) => s.artifacts);
   const campaign = useStore((s) => s.campaign);
@@ -14,7 +13,7 @@ export default function Phase3({ onDone }) {
   const [entered, setEntered] = useState(false);
 
   const data = useMemo(() => {
-    const A = r1.concat(r2);
+    const A = decisions;
     const wrong = A.filter((d) => !d.correct);
     const right = A.filter((d) => d.correct);
     const avgW = wrong.length ? wrong.reduce((s, d) => s + d.ms, 0) / wrong.length / 1000 : 0;
@@ -23,17 +22,15 @@ export default function Phase3({ onDone }) {
     const used = artifacts.map((id) => ARTS.find((a) => a.id === id).n);
     const overlap = used.filter((u) => missed.includes(u));
     const prof = PROFILE[campaign.hook];
-    const trusted = r1.find((d) => !d.correct && d.fake);
-    const acc1 = accuracyPct(r1);
-    const acc2 = accuracyPct(r2);
-    const delta = acc2 - acc1;
+    const trusted = A.find((d) => !d.correct && d.fake);
+    const acc = accuracyPct(A);
     const seen = {};
     const vl = valeLog.filter((x) => (seen[x] = (seen[x] || 0) + 1) === 1).map((x) => {
       const c = valeLog.filter((y) => y === x).length;
       return c > 1 ? `${x} ×${c}` : x;
     });
-    return { A, wrong, right, avgW, avgR, missed, used, overlap, prof, trusted, acc1, acc2, delta, vl };
-  }, [r1, r2, valeLog, artifacts, campaign]);
+    return { A, wrong, right, avgW, avgR, missed, used, overlap, prof, trusted, acc, vl };
+  }, [decisions, valeLog, artifacts, campaign]);
 
   useEffect(() => {
     setEntered(false);
@@ -47,7 +44,7 @@ export default function Phase3({ onDone }) {
   };
 
   const labels = [
-    "Both rounds", "Decision speed", "What you asked for", "Signals",
+    "Your round", "Decision speed", "What you asked for", "Signals",
     "Side by side", "Your vulnerability", "Debrief",
   ];
 
@@ -76,18 +73,20 @@ export default function Phase3({ onDone }) {
 }
 
 function BeatBoth({ data }) {
-  const { A, acc1, acc2, delta } = data;
+  const { A, wrong, acc } = data;
   return (
     <>
-      <p className="lede">You reviewed ten posts across two rounds.</p>
+      <p className="lede">You reviewed five posts before you built one of your own.</p>
       <div className="g9">
         {A.map((d, i) => (
           <div key={i} className={`cell in ${d.correct ? "" : "bad"}`}>{String(i + 1).padStart(2, "0")}</div>
         ))}
       </div>
       <p className="lede">
-        Round one: <b>{acc1}%</b>. Round two: <b>{acc2}%</b>.{" "}
-        {delta > 0 ? `You improved ${delta} points after building one yourself.` : delta < 0 ? `You dropped ${Math.abs(delta)} points.` : "No change."}
+        You got <b>{acc}%</b> right.{" "}
+        {wrong.length
+          ? `The ${wrong.length} you missed used the same tactics you reached for a few minutes later.`
+          : "You caught every one — worth remembering once you see what you built next."}
       </p>
     </>
   );
@@ -135,7 +134,7 @@ function BeatAsked({ data }) {
       ) : (
         <>
           <p className="big">You took what was offered <em>without asking questions</em>.</p>
-          <p className="sm">That's the same reflex the posts in round one were built for.</p>
+          <p className="sm">That's the same reflex the five posts you just reviewed were built for.</p>
         </>
       )}
     </>
@@ -185,7 +184,7 @@ function BeatVulnerability({ campaign }) {
   const prof = PROFILE[campaign.hook];
   return (
     <>
-      <p className="lede">Across ten decisions and one campaign, one pattern held.</p>
+      <p className="lede">Across five decisions and one campaign, one pattern held.</p>
       <p className="sm" style={{ marginBottom: 22 }}>
         You reached for {HOOKNAME[campaign.hook]} the moment you had the tools — and it was the fastest thing to reach for.
       </p>
@@ -210,7 +209,7 @@ function BeatDebrief({ data }) {
   const [picked, setPicked] = useState({});
   return (
     <>
-      <p className="lede">All ten posts, explained.</p>
+      <p className="lede">All five posts, explained.</p>
       {A.map((d, i) => (
         <div key={i} className="debrow">
           <span className="debidx">{String(i + 1).padStart(2, "0")}</span>

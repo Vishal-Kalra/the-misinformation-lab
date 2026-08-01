@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AUD_BASE } from "../../data/posts";
 
-export default function SpreadView({ show, reach, match, cred, topArtName, onContinue }) {
+export default function SpreadView({ show, reach, match, cred, topArtName, poolCount, onContinue }) {
   const canvasRef = useRef(null);
   const [displayed, setDisplayed] = useState(0);
 
@@ -59,7 +59,14 @@ export default function SpreadView({ show, reach, match, cred, topArtName, onCon
       <canvas id="cv" ref={canvasRef} width="400" height="400" />
       <div className="num">{displayed.toLocaleString()}</div>
       <div className="numsub">{AUD_BASE.toLocaleString()} × {match}% match × {cred}% credibility</div>
-      <div className="numline">The {topArtName?.toLowerCase()} did the most work — and you drew it yourself.</div>
+      <div className="numline">
+        {topArtName
+          ? <>The {topArtName.toLowerCase()} did the most work — and you drew it yourself.</>
+          : <>No credibility signals, no reach worth mentioning — that's the correlation, not a coincidence.</>}
+      </div>
+      <div className="numline" style={{ marginTop: 6, fontSize: 11, opacity: 0.7 }}>
+        Added to the shared pool — <b>{poolCount}</b> post{poolCount === 1 ? "" : "s"} in it now, yours included.
+      </div>
       <button className="pbtn" style={{ maxWidth: 220 }} onClick={onContinue}>
         Go to your profile
       </button>

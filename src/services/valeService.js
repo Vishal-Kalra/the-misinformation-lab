@@ -16,12 +16,7 @@
 // back to that cache on network failure so a filmed demo never waits on an API call.
 // Component code should not need to change — it only calls getValeResponse().
 
-import {
-  HEADS, RULES, MATCH, HOOKNAME, GENUINE_TEMPLATES,
-  HOOK_CLAUSES, SOURCE_SUGGESTIONS, VISUAL_THEMES, VISUAL_THEME_DEFAULT,
-} from "../data/posts";
-
-const randomFrom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+import { HEADS, RULES, MATCH, HOOKNAME, VISUAL_THEMES, VISUAL_THEME_DEFAULT } from "../data/posts";
 
 export function getAudienceMatch(aud, hook) {
   if (!aud || !hook) return 0;
@@ -67,30 +62,36 @@ export function getValeResponse(userText) {
   };
 }
 
-// Job 4 (Contribute tool): generate a fake post by explicit tactic (with an
-// optional emotional hook for extra flavor), or a genuine one — still
-// rule-based, so it works with no API key. Templates are picked at random for
-// variety across repeated uses. If no source was typed in, a plausible one
-// is suggested too, mirroring the reference prototype's "AI fills in both
-// fields" behaviour without a live model call.
-export function generateForTactic(tactic, { source, hook } = {}) {
-  const finalSource = source || randomFrom(SOURCE_SUGGESTIONS.fake);
-  const template = randomFrom(tactic.templates);
-  let headline = template({ source: finalSource });
-  if (hook && HOOK_CLAUSES[hook]) headline += HOOK_CLAUSES[hook]({ source: finalSource });
-  return { headline, why: tactic.why, source: finalSource };
-}
-
-export function generateGenuine({ source } = {}) {
-  const finalSource = source || randomFrom(SOURCE_SUGGESTIONS.genuine);
-  const template = randomFrom(GENUINE_TEMPLATES);
-  return { headline: template({ source: finalSource }), source: finalSource };
-}
-
-// Job 5 (Contribute tool "AI Visual"): keyword-match the headline to a
-// themed gradient instead of calling an image-generation API.
+// Job 4: keyword-match the headline to a theme, then render an actual
+// illustrated picture for it — the "generate one with AI" option in the post
+// image picker — instead of calling a real image-generation API. This is a
+// client-side stand-in exactly like the rest of Vale in this file: no key,
+// no network call, no risk of ever producing something photoreal. If a real
+// image model is wired in later, keep the same illustrated/abstract-only
+// constraint from SPEC.md §7 — this app is meant to stay "a manipulation
+// sandbox that cannot produce a usable fake."
+//
+// TODO(image-api): if a real (illustration-only, non-photoreal) image model
+// is ever wired in, swap the SVG body below for that call and keep this
+// function's signature — callers only use the returned { img, label }.
 export function generateVisualTheme(headline) {
   const lower = (headline || "").toLowerCase();
-  const theme = VISUAL_THEMES.find((t) => t.k.some((kw) => lower.includes(kw)));
-  return theme || VISUAL_THEME_DEFAULT;
+  const theme = VISUAL_THEMES.find((t) => t.k.some((kw) => lower.includes(kw))) || VISUAL_THEME_DEFAULT;
+  return { img: illustrationDataUri(theme), label: theme.label };
+}
+
+function illustrationDataUri({ from, to, glyph }) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180" viewBox="0 0 320 180">
+    <defs>
+      <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="${from}"/>
+        <stop offset="1" stop-color="${to}"/>
+      </linearGradient>
+    </defs>
+    <rect width="320" height="180" fill="url(#g)"/>
+    <circle cx="266" cy="30" r="58" fill="#ffffff" opacity="0.08"/>
+    <circle cx="34" cy="162" r="86" fill="#000000" opacity="0.06"/>
+    <text x="50%" y="54%" font-size="60" text-anchor="middle" dominant-baseline="middle" opacity="0.9">${glyph}</text>
+  </svg>`;
+  return `url("data:image/svg+xml,${encodeURIComponent(svg)}") center/cover`;
 }

@@ -37,7 +37,6 @@ const PostCanvas = forwardRef(function PostCanvas(
     source, onSourceChange,
     headline, headlineSwapping, onHeadlineChange,
     image, imageCaption, onImageClick,
-    imagePicker,
     hot,
     placed, selectedUid,
     editable,
@@ -63,7 +62,6 @@ const PostCanvas = forwardRef(function PostCanvas(
       >
         <em>{imageCaption}</em>
         {editable && <span className="k-img-hint">Click to swap image</span>}
-        {imagePicker}
       </div>
       {placed.map((p) => {
         const art = ARTS.find((a) => a.id === p.id);

@@ -1,12 +1,17 @@
-// Local, single-browser "community pool" for learner-submitted posts.
+// Local, single-browser "database of posts" that Phase 1 draws from.
 //
 // SPEC.md §8 is explicit: no database, session state in memory only. A real
-// cross-user shared feed (like the teammate prototype's window.storage pool)
-// would need a real backend — out of scope here. This is the local-only
-// compromise: posts a learner submits in Phase 2's Contribute tool are saved
-// to localStorage and mixed into *that same browser's* next Round 2, so the
-// "the community's fakes show up in your feed" feeling works for repeat
-// play/testing without standing up a database.
+// cross-user shared feed would need a real backend — out of scope here. This
+// is the local-only compromise: every campaign post published in Phase 2 is
+// saved to localStorage, and store.js's startPhase1() always pulls a random
+// 5 from the fixed seed content plus this pool. So "the community's fakes
+// show up in your feed" works for repeat play/testing on one browser,
+// without standing up a database.
+//
+// There's no separate "Contribute" step anymore — publishing to the profile
+// and adding the post to this pool are the same action (Phase2.jsx's
+// launch()), and there's no Round 2 to gate it behind; it feeds whatever the
+// *next* Phase 1 session draws.
 
 const KEY = "misinfo-lab:community-pool";
 
@@ -55,25 +60,25 @@ export function clearPool() {
   }
 }
 
-// Builds a full post object (same shape as the fixed R1/R2 posts) from
-// Contribute-tool form state, ready to drop straight into a feed.
-export function buildCommunityPost({ isFake, source, headline, tactic, img, cap }) {
+// Builds a full post object (same shape as the fixed R1/R2 posts) from the
+// campaign post the learner already built in the main composer — source,
+// headline, image, and whichever credibility signals they actually placed
+// (`signals`/`why` describe those, rather than a separately-chosen tactic
+// label). Every submitted post is a misinformation campaign post by
+// definition — that's what Phase 2 is — so there's no genuine/fake choice.
+export function buildCommunityPost({ source, headline, why, signals, img, cap }) {
   return {
-    name: source || (isFake ? "Unverified account" : "Community notice"),
+    name: source || "Unverified account",
     sub: "Community submitted",
     av: randomFrom(AVATAR_GRADIENTS),
     txt: headline,
     img: img || "linear-gradient(150deg,#CFCFD6,#9E9EA8)",
     cap: cap || "Illustration",
-    eng: isFake
-      ? [`${(1 + Math.random() * 8).toFixed(1)}K reactions`, `${Math.round(200 + Math.random() * 4000)} shares`]
-      : [`${Math.round(20 + Math.random() * 150)} reactions`, `${Math.round(2 + Math.random() * 20)} shares`],
-    fake: isFake,
-    v: isFake
-      ? ["No record found", "Recently", "Unverified"]
-      : ["Registered account", "Recently", "Original"],
-    why: tactic ? tactic.why : "Genuine. Submitted by another learner practicing the opposite move — writing something true and checkable.",
-    signals: tactic ? tactic.signals : [],
+    eng: [`${(1 + Math.random() * 8).toFixed(1)}K reactions`, `${Math.round(200 + Math.random() * 4000)} shares`],
+    fake: true,
+    v: ["No record found", "Recently", "Unverified"],
+    why: why || "Built by a fellow learner.",
+    signals: signals || [],
     community: true,
   };
 }

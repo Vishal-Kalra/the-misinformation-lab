@@ -1,22 +1,17 @@
 import { ARTS } from "../../data/posts";
 
-// Properties tab — shown when a placed credibility signal is selected on the
-// canvas. Scale/rotation/opacity sliders plus a text override, matching the
-// drag-select-edit model from phase2-composer-properties.html. Nothing to
-// show when no artifact is selected (SPEC.md's ArtifactPalette + canvas).
+// Inline inspector for whichever placed credibility signal is selected.
+// Rendered inside the merged Signals panel (ArtifactPalette above, this
+// below) rather than as its own tab — see Phase2.jsx: the two used to be
+// separate tabs and placing a signal silently jumped you from one to the
+// other, which read as the UI moving on its own. Caller only renders this
+// when `selected` is truthy (see the "why" fallback in Phase2.jsx).
 export default function PropertiesPanel({ selected, onUpdate, onRemove }) {
-  if (!selected) {
-    return (
-      <div className="tp on" id="t-pr">
-        <p className="pnone">Select a signal on the post to edit it.</p>
-      </div>
-    );
-  }
-
   const art = ARTS.find((a) => a.id === selected.id);
 
   return (
-    <div className="tp on" id="t-pr">
+    <div className="el-divider">
+      <span className="lab" style={{ margin: "0 0 8px" }}>Editing this signal</span>
       <div className="pname">{art.n}</div>
       <div className="pwhy">{art.why}</div>
 

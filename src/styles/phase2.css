@@ -16,6 +16,10 @@ select {
 .mv { font-family: var(--mono); font-size: 10.5px; color: var(--p2ink); width: 38px; text-align: right; font-variant-numeric: tabular-nums; }
 .pbtn { width: 100%; margin-top: 14px; padding: 13px; border-radius: 10px; border: none; background: var(--p2act); color: #fff; font-size: 13.5px; font-weight: 700; }
 .pbtn:disabled { background: #C6BEE4; }
+/* Manual entry — same shape as .pbtn so the two methods read as equally
+   valid choices, just visually secondary since Vale is still the default. */
+.pbtn-ghost { background: none; border: 1px solid var(--p2line); color: var(--p2ink); margin-top: 9px; }
+.pbtn-ghost:disabled { color: var(--p2mute); border-color: var(--p2line); background: none; }
 .tabs { display: flex; gap: 4px; padding: 12px 16px 0; }
 .tab { flex: 1; padding: 9px; border-radius: 8px 8px 0 0; border: 1px solid var(--p2line); border-bottom: none; background: #E9E5F5; font-size: 11.5px; font-weight: 600; color: var(--p2mute); }
 .tab.on { background: var(--p2card); color: var(--p2ink); }
@@ -33,6 +37,10 @@ select {
 /* Live editable canvas — inline text edit + click-to-swap image */
 .k-src[contenteditable], .k-hl[contenteditable] { cursor: text; border-radius: 4px; outline-offset: 2px; }
 .k-src[contenteditable]:hover, .k-hl[contenteditable]:hover { background: rgba(75,50,168,.06); }
+/* Manual entry starts blank — without these, an empty contentEditable div
+   just looks like missing content rather than an invitation to type. */
+.k-hl[contenteditable]:empty::before { content: "Click to write your headline"; color: var(--p2mute); font-weight: 500; }
+.k-src[contenteditable]:empty::before { content: "Click to add a source name"; color: var(--p2mute); }
 .k-img.swap { cursor: pointer; }
 .k-img-hint {
   position: absolute; top: 8px; right: 8px; font-family: var(--mono); font-size: 9px;
@@ -40,12 +48,27 @@ select {
   padding: 4px 8px; border-radius: 20px; opacity: 0; transition: opacity .15s;
 }
 .k-img.swap:hover .k-img-hint { opacity: 1; }
-.img-picker {
-  position: absolute; inset: 0; background: rgba(20,14,40,.72); display: grid;
-  grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 10px; align-content: center;
+/* Post picture picker — a proper modal, not squeezed into the canvas's
+   118px-tall image thumbnail (which is what used to force scrolling and
+   cram the two buttons together). Sits over the whole Phase 2 screen. */
+.img-picker-overlay {
+  position: absolute; inset: 0; z-index: 60; background: rgba(20,14,40,.55);
+  display: flex; align-items: center; justify-content: center; padding: 20px;
 }
-.img-picker-sw { height: 44px; border-radius: 6px; border: 2px solid rgba(255,255,255,.5); padding: 0; }
-.img-picker-sw:hover { border-color: #fff; }
+.img-picker {
+  background: var(--p2card); border: 1px solid var(--p2line); border-radius: 14px;
+  max-width: 360px; width: 100%; padding: 18px 16px 20px;
+}
+.img-picker-head { display: flex; align-items: center; justify-content: space-between; }
+.ip-close {
+  border: none; background: var(--p2bg); color: var(--p2mute); width: 26px; height: 26px;
+  border-radius: 50%; font-size: 16px; line-height: 1; cursor: pointer; flex: none;
+}
+.ip-close:hover { color: var(--p2ink); }
+.img-picker-actions { display: flex; flex-direction: column; gap: 10px; margin: 14px 0 12px; }
+.img-picker-actions .c-upload { margin-top: 0; padding: 13px; font-size: 12.5px; }
+.img-picker .c-note { margin: 0; }
+.img-picker .c-status { margin: 0 0 4px; }
 
 .art { position: absolute; user-select: none; touch-action: none; z-index: 5; transform-origin: center; }
 .art.sel { outline: 2px solid var(--p2act); outline-offset: 3px; border-radius: 4px; }
@@ -80,25 +103,22 @@ select {
 .numsub { font-size: 11px; color: var(--p2mute); font-family: var(--mono); margin-top: 2px; }
 .numline { margin-top: 18px; font-size: 13px; text-align: center; max-width: 30ch; line-height: 1.45; }
 
-/* Contribute tool */
-.c-toggle { display: flex; gap: 6px; margin-bottom: 4px; }
-.c-toggle button {
-  flex: 1; padding: 9px; border-radius: 8px; border: 1px solid var(--p2line);
-  background: var(--p2bg); color: var(--p2mute); font-size: 11.5px; font-weight: 600;
+/* Optional side action (Contribute) — deliberately not styled like a tab
+   or the primary .pbtn, so it doesn't compete with the actual tools or the
+   Publish CTA below it. */
+.side-link {
+  display: block; width: 100%; text-align: left; background: none; border: none;
+  font-family: inherit; font-size: 11.5px; font-weight: 600; color: var(--p2act);
+  padding: 14px 0 4px; margin: 10px 16px 0; cursor: pointer;
 }
-.c-toggle button.on { background: var(--p2act); color: #fff; border-color: var(--p2act); }
-.c-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.side-link:hover { text-decoration: underline; text-underline-offset: 2px; }
+.side-link:disabled { color: var(--p2mute); cursor: default; }
+.side-link:disabled:hover { text-decoration: none; }
+
 .c-input {
   width: 100%; border: 1px solid var(--p2line); border-radius: 9px; padding: 10px 12px;
   font-family: inherit; font-size: 13px; color: var(--p2ink); background: var(--p2card);
 }
-.c-textarea {
-  width: 100%; border: 1px solid var(--p2line); border-radius: 9px; padding: 10px 12px;
-  font-family: inherit; font-size: 13px; color: var(--p2ink); background: var(--p2card); resize: vertical;
-}
-.c-imggrid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; margin-top: 4px; }
-.c-img { height: 34px; border-radius: 6px; border: 2px solid transparent; padding: 0; }
-.c-img.on { border-color: var(--p2act); }
 .c-upload {
   width: 100%; margin-top: 8px; padding: 9px; border-radius: 8px; border: 1px dashed var(--p2line);
   background: var(--p2bg); color: var(--p2mute); font-size: 11.5px; font-weight: 600;
@@ -108,7 +128,10 @@ select {
 .c-poolcount { font-family: var(--mono); font-size: 10px; color: var(--p2mute); margin-top: 6px; }
 .c-poolcount b { color: var(--p2ink); }
 
-/* Properties panel — selected artifact's scale/rotation/opacity/text */
+/* Inline inspector inside the merged Signals tab — appears under the
+   palette the moment something's selected, instead of a separate "Props"
+   tab the drop used to silently jump you to. */
+.el-divider { margin-top: 14px; padding-top: 13px; border-top: 1px solid var(--p2line); }
 .pnone { font-size: 12px; color: var(--p2mute); padding: 8px 0; }
 .pname { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
 .pwhy { font-size: 11.5px; color: var(--p2mute); line-height: 1.45; margin-bottom: 13px; padding-bottom: 11px; border-bottom: 1px solid var(--p2line); }

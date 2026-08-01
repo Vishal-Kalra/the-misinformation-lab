@@ -17,6 +17,11 @@ export default function ValeChat({ messages, options, selectedOption, onSelectOp
   return (
     <div className="tp on" id="t-va">
       <div className="chat" ref={chatRef}>
+        {messages.length === 0 && (
+          <p className="pnone" style={{ margin: 0 }}>
+            Ask Vale for headline ideas, or for a rewrite of what you've written yourself — "make it angrier," "aimed younger," and so on.
+          </p>
+        )}
         {messages.map((m, idx) => (
           <div key={idx} className={`msg ${m.role === "user" ? "u" : "v"}`}>
             {m.role === "user" ? (

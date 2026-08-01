@@ -6,8 +6,7 @@ import ActionBar from "./ActionBar";
 import VerifyButton from "./VerifyButton";
 import VerifySheet from "./VerifySheet";
 
-export default function Phase1({ onRoundOneDone, onRoundTwoDone }) {
-  const round = useStore((s) => s.round);
+export default function Phase1({ onDone }) {
   const i = useStore((s) => s.i);
   const posts = useStore((s) => s.posts)();
   const recordDecision = useStore((s) => s.recordDecision);
@@ -27,7 +26,7 @@ export default function Phase1({ onRoundOneDone, onRoundTwoDone }) {
     setFlyDir(null);
     setVerifyOpen(false);
     t0.current = performance.now();
-  }, [i, round]);
+  }, [i]);
 
   const record = (action, reason, ms) => {
     recordDecision({
@@ -47,8 +46,7 @@ export default function Phase1({ onRoundOneDone, onRoundTwoDone }) {
   const goNext = () => {
     setTimeout(() => {
       if (i + 1 >= posts.length) {
-        if (round === 1) onRoundOneDone();
-        else onRoundTwoDone();
+        onDone();
       } else {
         advancePost();
       }
@@ -83,7 +81,7 @@ export default function Phase1({ onRoundOneDone, onRoundTwoDone }) {
 
   return (
     <section id="p1" className="scr">
-      <FeedHeader round={round} index={i} total={posts.length} />
+      <FeedHeader index={i} total={posts.length} />
       <div className="deck">
         <SwipeCard
           post={post}

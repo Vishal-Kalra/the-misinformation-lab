@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useStore, accuracyPct } from "../store";
 import { ARTS } from "../data/posts";
 
-export default function Profile({ onTakeRoundTwo, onSeeResult }) {
+export default function Profile({ onSeeResult }) {
   const campaign = useStore((s) => s.campaign);
   const placedArtifacts = useStore((s) => s.placedArtifacts);
   const postSource = useStore((s) => s.postSource);
@@ -10,24 +10,18 @@ export default function Profile({ onTakeRoundTwo, onSeeResult }) {
   const postImageCaption = useStore((s) => s.postImageCaption);
   const reach = useStore((s) => s.reach);
   const cred = useStore((s) => s.cred);
-  const r1 = useStore((s) => s.r1);
-  const r2 = useStore((s) => s.r2);
+  const decisions = useStore((s) => s.decisions);
+  const reflected = useStore((s) => s.reflected);
+  const restart = useStore((s) => s.reset);
 
-  const done2 = r2.length > 0;
-  const acc1 = accuracyPct(r1);
-  const acc2 = accuracyPct(r2);
-  const delta = acc2 - acc1;
+  const acc = accuracyPct(decisions);
 
-  const [bar1, setBar1] = useState(0);
-  const [bar2, setBar2] = useState(0);
+  const [bar, setBar] = useState(0);
 
   useEffect(() => {
-    const t = setTimeout(() => {
-      setBar1(acc1);
-      setBar2(acc2);
-    }, 120);
+    const t = setTimeout(() => setBar(acc), 120);
     return () => clearTimeout(t);
-  }, [acc1, acc2]);
+  }, [acc]);
 
   return (
     <section id="prof" className="scr">
@@ -80,27 +74,21 @@ export default function Profile({ onTakeRoundTwo, onSeeResult }) {
       <div className="psec">
         <div className="psech">Your test results</div>
         <div className="presult">
-          <div className="prtop"><span className="prname">Round 1 — before</span><span className="prscore">{acc1}%</span></div>
-          <div className="prbar"><i style={{ width: bar1 + "%" }} /></div>
+          <div className="prtop"><span className="prname">Detection accuracy</span><span className="prscore">{acc}%</span></div>
+          <div className="prbar"><i style={{ width: bar + "%" }} /></div>
         </div>
-        <div className="presult">
-          <div className="prtop">
-            <span className="prname">Round 2 — after</span>
-            <span className="prscore">{done2 ? acc2 + "%" : "—"}</span>
-          </div>
-          {done2 ? <div className="prbar"><i style={{ width: bar2 + "%" }} /></div> : <div className="prpend">Not taken yet</div>}
-        </div>
-        {done2 && (
-          <div className="pdelta">
-            <div className="n">{delta > 0 ? "+" : ""}{delta} points</div>
-            <div className="l">change in detection accuracy</div>
-          </div>
-        )}
       </div>
 
-      <button className="pbtn2" onClick={done2 ? onSeeResult : onTakeRoundTwo}>
-        {done2 ? "See what it means" : "Take round two"}
-      </button>
+      {reflected ? (
+        <div className="pactions">
+          <button className="pbtn2" onClick={onSeeResult}>Replay the reveal</button>
+          <button className="pbtn2 pbtn2-ghost" onClick={restart}>Start over</button>
+        </div>
+      ) : (
+        <button className="pbtn2" onClick={onSeeResult}>
+          See what it means
+        </button>
+      )}
     </section>
   );
 }

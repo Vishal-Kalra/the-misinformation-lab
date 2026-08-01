@@ -26,7 +26,8 @@ const SHOW_NAV = new Set(["phase1", "phase2", "profile"]);
 export default function App() {
   const phase = useStore((s) => s.phase);
   const setPhase = useStore((s) => s.setPhase);
-  const startRoundTwo = useStore((s) => s.startRoundTwo);
+  const startPhase1 = useStore((s) => s.startPhase1);
+  const markReflected = useStore((s) => s.markReflected);
   const setComposerStep = useStore((s) => s.setComposerStep);
   const [interstitial, setInterstitial] = useState(null);
 
@@ -48,20 +49,6 @@ export default function App() {
       next: () => setPhase("phase2"),
     });
 
-  const goPhase3AfterRoundTwo = () =>
-    setInterstitial({
-      kicker: "Round two complete", headline: "Let's look at what happened.",
-      body: "Both rounds, plus the campaign you built.", buttonLabel: "See the result",
-      next: () => setPhase("phase3"),
-    });
-
-  const goRoundTwo = () =>
-    setInterstitial({
-      kicker: "Round two", headline: "Five more posts.",
-      body: "Different town. Same tactics. Let's see if anything changed.", buttonLabel: "Begin",
-      next: () => { startRoundTwo(); setPhase("phase1"); },
-    });
-
   const finishInterstitial = () => {
     const next = interstitial.next;
     setInterstitial(null);
@@ -76,11 +63,11 @@ export default function App() {
           onProfile={() => setPhase("profile")}
         />
       )}
-      {phase === "intro" && <Intro onStart={() => setPhase("phase1")} />}
-      {phase === "phase1" && <Phase1 onRoundOneDone={goPhase2} onRoundTwoDone={goPhase3AfterRoundTwo} />}
+      {phase === "intro" && <Intro onStart={startPhase1} />}
+      {phase === "phase1" && <Phase1 onDone={goPhase2} />}
       {phase === "phase2" && <Phase2 onPublished={() => setPhase("profile")} />}
-      {phase === "profile" && <Profile onTakeRoundTwo={goRoundTwo} onSeeResult={() => setPhase("phase3")} />}
-      {phase === "phase3" && <Phase3 onDone={() => setPhase("profile")} />}
+      {phase === "profile" && <Profile onSeeResult={() => setPhase("phase3")} />}
+      {phase === "phase3" && <Phase3 onDone={() => { markReflected(); setPhase("profile"); }} />}
       {interstitial && (
         <Interstitial
           kicker={interstitial.kicker}

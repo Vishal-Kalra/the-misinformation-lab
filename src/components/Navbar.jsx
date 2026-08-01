@@ -7,27 +7,26 @@ const STEPS = [
 ];
 
 // Which step is "current" for breadcrumb purposes — profile sits between
-// phase1/phase2 and phase3 depending on how far the learner has gotten.
-function activeIndex(phase, round, r2length) {
+// phase2 and phase3 the first time through, and after phase3 the second.
+function activeIndex(phase, reflected) {
   if (phase === "phase1") return 0;
   if (phase === "phase2") return 1;
   if (phase === "phase3") return 2;
-  if (phase === "profile") return r2length > 0 ? 2 : round === 2 ? 0 : 1;
+  if (phase === "profile") return reflected ? 2 : 1;
   return 0;
 }
 
 export default function Navbar({ onBack, onProfile }) {
   const phase = useStore((s) => s.phase);
-  const round = useStore((s) => s.round);
-  const r1 = useStore((s) => s.r1);
-  const r2 = useStore((s) => s.r2);
+  const decisions = useStore((s) => s.decisions);
+  const reflected = useStore((s) => s.reflected);
   const composerStep = useStore((s) => s.composerStep);
 
   const canGoBack = phase === "phase2" && composerStep === "composer";
-  // Disabled mid-Phase-1 (either round) so jumping away can't strand an
-  // in-progress round with unrecorded posts — only safe at a checkpoint.
-  const canSeeProfile = phase !== "phase1" && r1.length >= 5;
-  const idx = activeIndex(phase, round, r2.length);
+  // Disabled mid-Phase-1 so jumping away can't strand an in-progress round
+  // with unrecorded posts — only safe at a checkpoint.
+  const canSeeProfile = phase !== "phase1" && decisions.length >= 5;
+  const idx = activeIndex(phase, reflected);
 
   return (
     <nav className="navbar">
@@ -60,7 +59,7 @@ export default function Navbar({ onBack, onProfile }) {
             onClick={onProfile}
             disabled={!canSeeProfile}
             aria-label="Your profile"
-            title={canSeeProfile ? "Your profile" : "Finish round one to unlock your profile"}
+            title={canSeeProfile ? "Your profile" : "Finish Phase 1 to unlock your profile"}
           >
             <span>You</span>
           </button>
