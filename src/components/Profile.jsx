@@ -32,7 +32,7 @@ export default function Profile({ onTakeRoundTwo, onSeeResult }) {
   return (
     <section id="prof" className="scr">
       <div className="bar">
-        <span className="logo">strea</span>
+        <span className="logo">stream</span>
         <span className="cnt">Profile</span>
       </div>
       <div className="phead">
