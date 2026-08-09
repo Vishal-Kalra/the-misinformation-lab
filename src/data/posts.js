@@ -168,21 +168,28 @@ export const PROFILE = {
 
 export const AUD_BASE = 2400;
 
-// Rule-based "AI generates a picture" — keyword-matches the headline to a
-// theme (color pair + a glyph), then services/valeService.js's
-// generateVisualTheme() renders that as an actual illustrated image (an SVG,
-// not a flat color block) instead of calling a real image-generation API.
+// "AI generates a picture" — keyword-matches the headline to a theme, then
+// hands back a pre-loaded illustration for it (services/valeService.js's
+// generateVisualTheme()) instead of calling a real image-generation API.
 // SPEC.md §7 is explicit that this stays illustrated/abstract — never
 // photoreal, and it can't depict a real person, place, or event — so a
-// keyword-matched theme is the deliberate ceiling here, not a placeholder
-// for photoreal generation. If a real image model is ever wired in, it
-// should be constrained to the same illustrated/abstract output.
+// small curated set, picked by keyword, is the deliberate ceiling here, not
+// a placeholder for photoreal generation. If a real image model is ever
+// wired in, it should be constrained to the same illustrated/abstract output.
+import waterImg from "../assets/images/themes/water.svg";
+import financeImg from "../assets/images/themes/finance.svg";
+import schoolImg from "../assets/images/themes/school.svg";
+import healthImg from "../assets/images/themes/health.svg";
+import safetyImg from "../assets/images/themes/safety.svg";
+import chartImg from "../assets/images/themes/chart.svg";
+import generalImg from "../assets/images/themes/general.svg";
+
 export const VISUAL_THEMES = [
-  { k: ["water", "reservoir", "drink", "pipe"], from: "#9DB4D6", to: "#6E88B4", glyph: "💧", label: "Water" },
-  { k: ["money", "fund", "cost", "budget", "bonus"], from: "#E0BBA8", to: "#C08E76", glyph: "💰", label: "Finance" },
-  { k: ["school", "kid", "child", "student", "meal"], from: "#C3AFD9", to: "#9179B6", glyph: "🎒", label: "School" },
-  { k: ["health", "doctor", "clinic", "medical", "symptom"], from: "#A9C4B6", to: "#7A9E8C", glyph: "🩺", label: "Health" },
-  { k: ["crime", "danger", "safety", "police", "risk"], from: "#D9A8A8", to: "#B47474", glyph: "🛡", label: "Safety" },
-  { k: ["chart", "number", "stat", "percent", "data"], from: "#CFC6A8", to: "#A69874", glyph: "📊", label: "Chart" },
+  { k: ["water", "reservoir", "drink", "pipe"], img: waterImg, label: "Water" },
+  { k: ["money", "fund", "cost", "budget", "bonus"], img: financeImg, label: "Finance" },
+  { k: ["school", "kid", "child", "student", "meal"], img: schoolImg, label: "School" },
+  { k: ["health", "doctor", "clinic", "medical", "symptom"], img: healthImg, label: "Health" },
+  { k: ["crime", "danger", "safety", "police", "risk"], img: safetyImg, label: "Safety" },
+  { k: ["chart", "number", "stat", "percent", "data"], img: chartImg, label: "Chart" },
 ];
-export const VISUAL_THEME_DEFAULT = { from: "#CFCFD6", to: "#9E9EA8", glyph: "🖼", label: "General" };
+export const VISUAL_THEME_DEFAULT = { img: generalImg, label: "General" };

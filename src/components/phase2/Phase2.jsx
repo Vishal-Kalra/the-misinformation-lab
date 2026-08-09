@@ -266,7 +266,7 @@ export default function Phase2({ onPublished }) {
             onHeadlineChange={editHeadline}
             image={postImage}
             imageCaption={postImageCaption}
-            onImageClick={() => setImagePickerOpen((o) => !o)}
+            onImageClick={() => setImagePickerOpen(true)}
             placed={placedArtifacts}
           />
           <div className="composer-tools">

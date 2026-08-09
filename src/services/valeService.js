@@ -62,9 +62,9 @@ export function getValeResponse(userText) {
   };
 }
 
-// Job 4: keyword-match the headline to a theme, then render an actual
-// illustrated picture for it — the "generate one with AI" option in the post
-// image picker — instead of calling a real image-generation API. This is a
+// Job 4: keyword-match the headline to a theme, then hand back a pre-loaded
+// illustration for it — the "generate one with AI" option in the post image
+// picker — instead of calling a real image-generation API. This is a
 // client-side stand-in exactly like the rest of Vale in this file: no key,
 // no network call, no risk of ever producing something photoreal. If a real
 // image model is wired in later, keep the same illustrated/abstract-only
@@ -72,26 +72,10 @@ export function getValeResponse(userText) {
 // sandbox that cannot produce a usable fake."
 //
 // TODO(image-api): if a real (illustration-only, non-photoreal) image model
-// is ever wired in, swap the SVG body below for that call and keep this
+// is ever wired in, swap the lookup below for that call and keep this
 // function's signature — callers only use the returned { img, label }.
 export function generateVisualTheme(headline) {
   const lower = (headline || "").toLowerCase();
   const theme = VISUAL_THEMES.find((t) => t.k.some((kw) => lower.includes(kw))) || VISUAL_THEME_DEFAULT;
-  return { img: illustrationDataUri(theme), label: theme.label };
-}
-
-function illustrationDataUri({ from, to, glyph }) {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180" viewBox="0 0 320 180">
-    <defs>
-      <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="${from}"/>
-        <stop offset="1" stop-color="${to}"/>
-      </linearGradient>
-    </defs>
-    <rect width="320" height="180" fill="url(#g)"/>
-    <circle cx="266" cy="30" r="58" fill="#ffffff" opacity="0.08"/>
-    <circle cx="34" cy="162" r="86" fill="#000000" opacity="0.06"/>
-    <text x="50%" y="54%" font-size="60" text-anchor="middle" dominant-baseline="middle" opacity="0.9">${glyph}</text>
-  </svg>`;
-  return `url("data:image/svg+xml,${encodeURIComponent(svg)}") center/cover`;
+  return { img: `url("${theme.img}") center/cover`, label: theme.label };
 }
