@@ -32,12 +32,17 @@ export default function CampaignSetup({ aud, hook, onAud, onHook, onOpenStrategi
           composer with the same tools available afterward; this only
           decides how the first draft gets written. */}
       <span className="lab">How do you want to build it?</span>
+      <p className="setup-note">
+        Either way you land in the same composer, with Vale and the credibility signals available.
+        This only decides who writes the first line.
+      </p>
       <button className="pbtn" disabled={!match} onClick={onOpenStrategist}>
         Let Vale write it
       </button>
       <button className="pbtn pbtn-ghost" disabled={!match} onClick={onManual}>
         Write it yourself
       </button>
+      {!match && <p className="pblock">Pick an audience and a hook first.</p>}
     </div>
   );
 }

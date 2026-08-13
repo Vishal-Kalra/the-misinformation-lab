@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { useStore, accuracyPct } from "../store";
 import { ARTS } from "../data/posts";
+import { downloadSession } from "../services/exportSession";
+import { clearPool } from "../services/communityPool";
 
-export default function Profile({ onSeeResult }) {
+export default function Profile({ onRoundTwo, onSeeResult }) {
   const campaign = useStore((s) => s.campaign);
   const placedArtifacts = useStore((s) => s.placedArtifacts);
   const postSource = useStore((s) => s.postSource);
@@ -10,18 +12,30 @@ export default function Profile({ onSeeResult }) {
   const postImageCaption = useStore((s) => s.postImageCaption);
   const reach = useStore((s) => s.reach);
   const cred = useStore((s) => s.cred);
-  const decisions = useStore((s) => s.decisions);
+  const r1 = useStore((s) => s.r1);
+  const r2 = useStore((s) => s.r2);
   const reflected = useStore((s) => s.reflected);
   const restart = useStore((s) => s.reset);
 
-  const acc = accuracyPct(decisions);
+  const before = accuracyPct(r1);
+  const after = accuracyPct(r2);
+  const hasRoundTwo = r2.length > 0;
+  const delta = after - before;
 
-  const [bar, setBar] = useState(0);
+  const [bars, setBars] = useState({ before: 0, after: 0 });
 
   useEffect(() => {
-    const t = setTimeout(() => setBar(acc), 120);
+    const t = setTimeout(() => setBars({ before, after }), 120);
     return () => clearTimeout(t);
-  }, [acc]);
+  }, [before, after]);
+
+  // One tester's published fake lands in the pool that feeds the next tester's
+  // round 2, so the reset between sessions has to clear it too — otherwise the
+  // eight sessions aren't independent.
+  const resetForNextTester = () => {
+    clearPool();
+    restart();
+  };
 
   return (
     <section id="prof" className="scr">
@@ -74,20 +88,43 @@ export default function Profile({ onSeeResult }) {
       <div className="psec">
         <div className="psech">Your test results</div>
         <div className="presult">
-          <div className="prtop"><span className="prname">Detection accuracy</span><span className="prscore">{acc}%</span></div>
-          <div className="prbar"><i style={{ width: bar + "%" }} /></div>
+          <div className="prtop"><span className="prname">Round one — before</span><span className="prscore">{before}%</span></div>
+          <div className="prbar"><i style={{ width: bars.before + "%" }} /></div>
         </div>
+        {hasRoundTwo ? (
+          <>
+            <div className="presult">
+              <div className="prtop"><span className="prname">Round two — after</span><span className="prscore">{after}%</span></div>
+              <div className="prbar"><i style={{ width: bars.after + "%" }} /></div>
+            </div>
+            <div className={`pdelta ${delta > 0 ? "up" : delta < 0 ? "down" : ""}`}>
+              <span className="pdn">{delta > 0 ? "+" : ""}{delta}</span>
+              <span className="pdl">
+                {delta > 0
+                  ? "points, after you built one yourself"
+                  : delta < 0
+                    ? "points. Building one didn't make you harder to fool."
+                    : "points. No change either way."}
+              </span>
+            </div>
+          </>
+        ) : (
+          <p className="prnote">Round two is the other half of the measurement — take it to see whether building a fake changed how you read them.</p>
+        )}
       </div>
 
-      {reflected ? (
+      {!hasRoundTwo ? (
+        <button className="pbtn2" onClick={onRoundTwo}>Take round two</button>
+      ) : reflected ? (
         <div className="pactions">
           <button className="pbtn2" onClick={onSeeResult}>Replay the reveal</button>
-          <button className="pbtn2 pbtn2-ghost" onClick={restart}>Start over</button>
+          <button className="pbtn2 pbtn2-ghost" onClick={() => downloadSession(useStore.getState())}>
+            Download session data
+          </button>
+          <button className="pbtn2 pbtn2-ghost" onClick={resetForNextTester}>Reset for next tester</button>
         </div>
       ) : (
-        <button className="pbtn2" onClick={onSeeResult}>
-          See what it means
-        </button>
+        <button className="pbtn2" onClick={onSeeResult}>See what it means</button>
       )}
     </section>
   );

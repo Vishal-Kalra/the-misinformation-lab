@@ -1,23 +1,73 @@
-#intro { background: #0B0B0F; color: #E9E9EE; justify-content: center; padding: 36px 30px; gap: 16px; }
-#intro .k { font-family: var(--mono); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: #7A7A85; }
-#intro h1 { font-family: "Newsreader", serif; font-weight: 300; font-size: 34px; line-height: 1.12; margin: 0; letter-spacing: -.02em; }
-#intro h1 em { font-style: italic; color: #C9C2E8; }
-#intro p { font-size: 14px; color: #8B8B96; margin: 0; line-height: 1.6; max-width: 32ch; }
-#intro button { margin-top: 12px; align-self: flex-start; background: #E9E9EE; color: #0B0B0F; border: none; padding: 14px 28px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; }
+/* Intro — the cold open (SPEC.md §3). Dark, so the shift into Phase 1's
+   ordinary white feed lands as a change of world rather than a change of page.
 
-.inter { position: absolute; inset: 0; background: #fff; z-index: 60; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; text-align: center; padding: 32px; transition: opacity .5s; }
-.inter .k { font-family: var(--mono); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--p2mute); }
-.inter h2 { margin: 0; font-family: "Space Grotesk", sans-serif; font-size: 25px; font-weight: 700; letter-spacing: -.02em; color: var(--p2ink); line-height: 1.2; }
-.inter p { margin: 0; font-size: 13.5px; color: var(--p2mute); max-width: 29ch; }
-.inter button { margin-top: 8px; background: var(--p2act); color: #fff; border: none; padding: 13px 26px; border-radius: 10px; font-size: 13.5px; font-weight: 700; }
-
-/* Desktop: this is a browser tab, not a phone screen — give the intro room to breathe. */
-@media (min-width: 700px) {
-  #intro { max-width: 720px; width: 100%; margin: 0 auto; padding: 0 48px; gap: 22px; }
-  #intro h1 { font-size: 52px; }
-  #intro p { font-size: 16px; max-width: 42ch; }
-  #intro button { padding: 16px 34px; font-size: 15px; }
-  .inter h2 { font-size: 36px; }
-  .inter p { font-size: 15px; max-width: 38ch; }
-  .inter button { padding: 15px 32px; font-size: 14.5px; }
+   Everything here sits in a normal-flow wrapper with vertical padding rather
+   than a centred flex child, so a short viewport (or a large accessibility font
+   size) scrolls instead of clipping the top off. */
+#intro {
+  background: #0B0B0F;
+  color: #E9E9EE;
+  padding: clamp(28px, 7vh, 72px) 24px clamp(36px, 8vh, 80px);
+  justify-content: center;
 }
+.intro-wrap { width: 100%; max-width: 620px; margin: 0 auto; }
+
+#intro .k {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .2em;
+  text-transform: uppercase; color: #7A7A85; display: block; margin-bottom: 18px;
+}
+#intro h1 {
+  font-family: "Newsreader", serif; font-weight: 300;
+  font-size: clamp(30px, 6.4vw, 46px); line-height: 1.1;
+  margin: 0 0 20px; letter-spacing: -.02em;
+}
+#intro h1 em { font-style: italic; color: #C9C2E8; }
+.intro-lead {
+  font-size: clamp(13.5px, 1.7vw, 15.5px); color: #8B8B96;
+  margin: 0 0 30px; line-height: 1.62; max-width: 46ch;
+}
+
+/* Three steps. Numbered, quiet, and deliberately not icon cards — this screen
+   is meant to read as a cold open, not a marketing page. */
+.intro-steps { list-style: none; margin: 0 0 34px; padding: 0; display: grid; gap: 1px; background: #1C1C24; border-radius: var(--r-md); overflow: hidden; }
+.intro-steps li {
+  display: grid; grid-template-columns: 34px 1fr; grid-template-rows: auto auto;
+  gap: 2px 12px; background: #101016; padding: 15px 16px;
+}
+.isn { grid-row: 1 / span 2; font-family: var(--mono); font-size: 10px; letter-spacing: .12em; color: #5D5D69; padding-top: 3px; }
+.ist { font-size: 14px; font-weight: 600; color: #E9E9EE; letter-spacing: -.01em; }
+.isb { font-size: 12.5px; color: #7E7E8A; line-height: 1.5; }
+
+.intro-cta { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 18px; }
+#intro button {
+  background: #E9E9EE; color: #0B0B0F; border: none;
+  padding: 15px 30px; border-radius: var(--r-md);
+  font-size: 14.5px; font-weight: 600; cursor: pointer;
+  box-shadow: 0 6px 20px rgba(233,233,238,.14);
+}
+#intro button:hover { background: #fff; transform: translateY(-1px); box-shadow: 0 10px 28px rgba(233,233,238,.2); }
+.intro-meta { font-size: 11.5px; color: #5D5D69; }
+
+@media (min-width: 720px) {
+  .intro-steps { grid-template-columns: repeat(3, 1fr); }
+  .intro-steps li { grid-template-columns: 1fr; grid-template-rows: auto auto auto; gap: 6px; padding: 17px 17px 19px; }
+  .isn { grid-row: auto; padding-top: 0; }
+}
+
+/* Interstitial — fixed, not absolute. As an absolutely positioned child of #app
+   it was anchored to the document box, so on a page taller than the viewport it
+   could render its centred content off-screen. */
+.inter {
+  position: fixed; inset: 0; background: #fff; z-index: 80;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 14px; text-align: center; padding: 32px; transition: opacity .5s var(--e-soft);
+}
+.inter .k { font-family: var(--mono); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--p2mute); }
+.inter h2 { margin: 0; font-family: "Space Grotesk", sans-serif; font-size: clamp(24px, 4.6vw, 36px); font-weight: 700; letter-spacing: -.02em; color: var(--p2ink); line-height: 1.2; }
+.inter p { margin: 0; font-size: clamp(13.5px, 1.8vw, 15px); color: var(--p2mute); max-width: 38ch; }
+.inter button {
+  margin-top: 8px; background: var(--p2act); color: #fff; border: none;
+  padding: 14px 30px; border-radius: var(--r-md); font-size: 14px; font-weight: 700;
+  box-shadow: var(--sh-2);
+}
+.inter button:hover { transform: translateY(-1px); box-shadow: var(--sh-3); }

@@ -34,9 +34,14 @@ select {
 .k-img { height: 172px; background: linear-gradient(150deg,#9DB4D6,#6E88B4); position: relative; }
 .k-img em { position: absolute; left: 0; right: 0; bottom: 0; font-style: normal; padding: 7px 10px; font-size: 10px; color: #fff; background: linear-gradient(transparent, rgba(0,0,0,.55)); }
 
-/* Live editable canvas — inline text edit + click-to-swap image */
+/* Live editable canvas — inline text edit + click-to-swap image.
+   The affordance is persistent, not hover-only: hover doesn't exist on touch,
+   so a hover-only cue meant half the users never discovered the headline was
+   editable at all. */
 .k-src[contenteditable], .k-hl[contenteditable] { cursor: text; border-radius: 4px; outline-offset: 2px; }
+.edt { border-bottom: 1px dashed rgba(75,50,168,.28); }
 .k-src[contenteditable]:hover, .k-hl[contenteditable]:hover { background: rgba(75,50,168,.06); }
+.edt:focus { background: rgba(75,50,168,.06); border-bottom-style: solid; }
 /* Manual entry starts blank — without these, an empty contentEditable div
    just looks like missing content rather than an invitation to type. */
 .k-hl[contenteditable]:empty::before { content: "Click to write your headline"; color: var(--p2mute); font-weight: 500; }
@@ -45,7 +50,7 @@ select {
 .k-img-hint {
   position: absolute; top: 8px; right: 8px; font-family: var(--mono); font-size: 9px;
   letter-spacing: .06em; text-transform: uppercase; color: #fff; background: rgba(20,14,40,.55);
-  padding: 4px 8px; border-radius: 20px; opacity: 0; transition: opacity .15s;
+  padding: 4px 8px; border-radius: 20px; opacity: .8; transition: opacity .15s;
 }
 .k-img.swap:hover .k-img-hint { opacity: 1; }
 /* Post picture picker — a proper modal, not squeezed into the canvas's
@@ -84,7 +89,7 @@ select {
 .pi .n { font-size: 7.5px; color: var(--p2mute); text-align: center; }
 .why { background: #EDE9F8; border-radius: 9px; padding: 10px 12px; font-size: 11.5px; line-height: 1.45; margin-top: 9px; min-height: 50px; }
 .why b { display: block; font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--p2mute); margin-bottom: 4px; font-weight: 500; }
-.chat { max-height: 160px; overflow-y: auto; display: flex; flex-direction: column; gap: 9px; margin-bottom: 10px; }
+.chat { max-height: 230px; overflow-y: auto; display: flex; flex-direction: column; gap: 9px; margin-bottom: 10px; }
 .msg { max-width: 88%; font-size: 12.5px; line-height: 1.42; }
 .msg.u { align-self: flex-end; background: var(--p2act); color: #fff; padding: 8px 11px; border-radius: 12px 12px 3px 12px; }
 .msg.v { align-self: flex-start; background: var(--p2bg); border: 1px solid var(--p2line); padding: 9px 11px; border-radius: 12px 12px 12px 3px; }
@@ -92,11 +97,40 @@ select {
 .vbar { display: flex; gap: 7px; }
 .vbar input { flex: 1; border: 1px solid var(--p2line); border-radius: 18px; padding: 9px 12px; font-family: inherit; font-size: 12.5px; background: var(--p2bg); color: var(--p2ink); }
 .vbar button { border: none; background: var(--p2act); color: #fff; border-radius: 50%; width: 34px; height: 34px; flex: none; }
+/* Vale refusing is a teaching beat, not an error — marked, but not alarming. */
+.msg.v.ref { background: #FBF7E4; border-color: #E8DCA8; }
+.msg.v.ref .w { border-top-color: #E8DCA8; }
+/* Typing indicator — Vale reads as writing rather than looking something up. */
+.vthink { display: flex; gap: 4px; align-items: center; padding: 12px 11px; }
+.vthink i { width: 5px; height: 5px; border-radius: 50%; background: var(--p2mute); opacity: .35; animation: vdot 1.1s infinite; }
+.vthink i:nth-child(2) { animation-delay: .16s; }
+.vthink i:nth-child(3) { animation-delay: .32s; }
+@keyframes vdot { 0%, 60%, 100% { opacity: .25; transform: translateY(0); } 30% { opacity: .9; transform: translateY(-3px); } }
+/* Suggested prompts — the learner picks instead of guessing what to type. */
+.vsug { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
+.vsugb {
+  background: var(--p2bg); border: 1px solid var(--p2line); border-radius: 20px;
+  padding: 5px 10px; font-family: inherit; font-size: 11px; color: var(--p2ink);
+}
+.vsugb:hover:not(:disabled) { border-color: var(--p2act); color: var(--p2act); }
+.vsugb:disabled { opacity: .5; }
+.palhint { font-size: 10.5px; color: var(--p2mute); margin: 8px 0 0; line-height: 1.45; }
+.palhint kbd { font-family: var(--mono); font-size: 9.5px; background: var(--p2bg); border: 1px solid var(--p2line); border-radius: 4px; padding: 1px 4px; }
+.pblock { font-size: 11px; color: var(--p2mute); margin: 7px 0 18px; min-height: 15px; line-height: 1.4; }
+.setup-note { font-size: 11.5px; color: var(--p2mute); line-height: 1.5; margin: 0 0 4px; }
+/* The curated illustration gallery inside the image picker. */
+.scene-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 14px 0 4px; }
+.scene { padding: 0; border: 1px solid var(--p2line); background: none; border-radius: 9px; overflow: hidden; text-align: left; }
+.scene:hover { border-color: var(--p2act); }
+.scene-img { display: block; width: 100%; aspect-ratio: 4 / 3; }
+.scene-lab { display: block; font-size: 9.5px; color: var(--p2mute); padding: 5px 6px 6px; line-height: 1.25; }
+@media (max-width: 620px) { .scene-grid { grid-template-columns: repeat(3, 1fr); } }
+.hopts { margin-bottom: 10px; }
 .hopt { display: block; width: 100%; text-align: left; background: var(--p2bg); border: 1px solid var(--p2line); border-radius: 10px; padding: 11px; margin-bottom: 7px; color: var(--p2ink); }
 .hopt.on { border-color: var(--p2act); }
 .hopt .t { font-size: 13px; font-weight: 700; line-height: 1.3; }
 .hopt .w { font-size: 10.5px; color: var(--p2mute); margin-top: 4px; line-height: 1.4; }
-#spread { position: absolute; inset: 0; background: var(--p2bg); z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 28px; opacity: 0; transition: opacity .45s; }
+#spread { position: fixed; inset: 0; background: var(--p2bg); z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 28px; opacity: 0; transition: opacity .45s; }
 #spread.show { opacity: 1; }
 #cv { width: 200px; height: 200px; }
 .num { font-size: 33px; font-weight: 700; letter-spacing: -.03em; color: var(--go); font-variant-numeric: tabular-nums; margin-top: 8px; }
@@ -177,3 +211,39 @@ select {
   .composer .canvas { height: 420px; }
   .composer .k-img { height: 362px; }
 }
+
+/* --- surface pass: composer ----------------------------------------------- */
+.canvas { border-radius: var(--r-lg); box-shadow: var(--sh-2); }
+.canvas.hot { box-shadow: 0 0 0 2px var(--p2act), var(--sh-3); }
+.tabs { gap: 4px; }
+.tab { border-radius: var(--r-sm) var(--r-sm) 0 0; }
+.pi { border-radius: var(--r-md); box-shadow: var(--sh-1); }
+.pi:hover { box-shadow: var(--sh-2); transform: translateY(-1px); border-color: var(--p2act); }
+.hopt { border-radius: var(--r-md); transition: border-color .18s var(--e-soft), background .18s var(--e-soft); }
+.hopt:hover { border-color: var(--p2act); }
+.hopt.on { box-shadow: var(--sh-1); }
+.msg { border-radius: var(--r-md); }
+.msg.u { border-bottom-right-radius: 5px; }
+.msg.v { border-bottom-left-radius: 5px; }
+.vbar input { border-radius: 999px; }
+.vbar button { border-radius: 999px; }
+.vsugb { transition: border-color .18s var(--e-soft), color .18s var(--e-soft), transform .12s var(--e-out); }
+.vsugb:hover:not(:disabled) { transform: translateY(-1px); }
+.pbtn { border-radius: var(--r-md); box-shadow: var(--sh-1); }
+.pbtn:not(:disabled):hover { box-shadow: var(--sh-2); transform: translateY(-1px); }
+.img-picker { border-radius: var(--r-xl); box-shadow: var(--sh-3); }
+.img-picker-overlay { backdrop-filter: blur(6px); background: rgba(36,26,71,.28); }
+.scene { border-radius: var(--r-sm); transition: border-color .18s var(--e-soft), transform .12s var(--e-out), box-shadow .18s var(--e-soft); }
+.scene:hover { transform: translateY(-2px); box-shadow: var(--sh-2); }
+.mb, .mb i { border-radius: 999px; }
+#spread { backdrop-filter: blur(4px); }
+
+/* The picker is a modal, so it's fixed to the viewport — as an absolutely
+   positioned child it was anchored to #p2 and could sit off-screen on a tall
+   page, the same failure the Phase 1 verify sheet had. Widened for the scene
+   grid, and scrollable in case the viewport is short. */
+.img-picker-overlay { position: fixed; }
+.img-picker { max-width: 560px; max-height: 88vh; overflow-y: auto; padding: 20px 20px 22px; }
+.img-picker-actions { flex-direction: row; }
+.img-picker-actions .c-upload { flex: 1; }
+@media (max-width: 560px) { .img-picker-actions { flex-direction: column; } }

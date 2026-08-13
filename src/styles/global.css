@@ -9,28 +9,45 @@
 
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
+html, body { min-height: 100%; }
 body {
   margin: 0;
   background: #0B0B0F;
-  min-height: 100vh;
   font-family: system-ui, sans-serif;
 }
 /* Full-bleed app shell — each phase fills the browser and centers its own
    readable content column via width caps on #p1/#p2/#p3/#prof (see below).
-   No fixed-width "phone in a void" frame: this is a website, not a device mock. */
+   No fixed-width "phone in a void" frame: this is a website, not a device mock.
+
+   `overflow-x: clip`, not `hidden`: when either axis is set to a non-visible
+   value, the *other* axis computes to `auto`, which quietly turned #app into a
+   viewport-height scroll container. `clip` constrains x without touching y. */
 #app {
   width: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
   position: relative;
-  overflow-x: hidden;
+  overflow-x: clip;
   display: flex;
   flex-direction: column;
   transition: background .6s ease;
 }
 .hidden { display: none !important; }
+/* Visible to screen readers only — used for the live region that announces
+   each Phase 1 decision, which is otherwise conveyed purely by animation. */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
 button { font-family: inherit; cursor: pointer; }
 button:disabled { cursor: default; }
-.scr { flex: 1; display: flex; flex-direction: column; position: relative; }
+/* `flex: 1 0 auto`, not `flex: 1`. The shorthand `flex: 1` sets flex-basis to
+   0, which forces every screen to exactly the container height regardless of
+   how much content it holds; a screen taller than the viewport then overflows
+   in both directions under `justify-content: center`, and the part above the
+   top edge cannot be scrolled to. With an `auto` basis the screen is at least
+   its content height and only grows to fill leftover space. */
+.scr { flex: 1 0 auto; display: flex; flex-direction: column; position: relative; }
 .bar { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; flex: none; }
 .pad { padding: 0 16px; }
 
@@ -43,3 +60,37 @@ button:disabled { cursor: default; }
 }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* ---------------------------------------------------------------------------
+   Contemporary surface pass.
+   The original styling was flat 2015-era UI: hard 1px borders, single-stop
+   shadows, abrupt state changes. These tokens add layered shadows, a springier
+   easing curve and consistent radii, applied on top of the per-phase palettes
+   rather than replacing them — the three visual languages still read as three
+   different products.
+   --------------------------------------------------------------------------- */
+:root {
+  --r-sm: 10px; --r-md: 14px; --r-lg: 20px; --r-xl: 28px;
+  --e-out: cubic-bezier(.22, 1, .36, 1);
+  --e-soft: cubic-bezier(.4, 0, .2, 1);
+  --sh-1: 0 1px 2px rgba(16,18,28,.04), 0 2px 8px rgba(16,18,28,.04);
+  --sh-2: 0 2px 4px rgba(16,18,28,.04), 0 8px 24px rgba(16,18,28,.07);
+  --sh-3: 0 4px 10px rgba(16,18,28,.06), 0 18px 48px rgba(16,18,28,.11);
+}
+
+/* Buttons get a consistent, physical press rather than an instant colour flip. */
+button { transition: background .18s var(--e-soft), border-color .18s var(--e-soft),
+                     color .18s var(--e-soft), box-shadow .18s var(--e-soft),
+                     transform .12s var(--e-out); }
+button:not(:disabled):active { transform: translateY(1px) scale(.995); }
+
+:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; border-radius: 6px; }
+
+/* Selection and scrollbars — small things, but their absence is what makes an
+   interface feel unfinished. */
+::selection { background: rgba(75,50,168,.18); }
+* { scrollbar-width: thin; scrollbar-color: rgba(0,0,0,.18) transparent; }
+*::-webkit-scrollbar { width: 9px; height: 9px; }
+*::-webkit-scrollbar-thumb { background: rgba(0,0,0,.16); border-radius: 6px; border: 2px solid transparent; background-clip: content-box; }
+*::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,.28); background-clip: content-box; }
+*::-webkit-scrollbar-track { background: transparent; }

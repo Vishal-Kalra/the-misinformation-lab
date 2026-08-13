@@ -1,4 +1,4 @@
-import { useStore } from "../store";
+import { useStore, ROUND_SIZE } from "../store";
 
 const STEPS = [
   { key: "phase1", label: "Detect" },
@@ -18,14 +18,15 @@ function activeIndex(phase, reflected) {
 
 export default function Navbar({ onBack, onProfile }) {
   const phase = useStore((s) => s.phase);
-  const decisions = useStore((s) => s.decisions);
+  const r1 = useStore((s) => s.r1);
   const reflected = useStore((s) => s.reflected);
   const composerStep = useStore((s) => s.composerStep);
 
   const canGoBack = phase === "phase2" && composerStep === "composer";
   // Disabled mid-Phase-1 so jumping away can't strand an in-progress round
-  // with unrecorded posts — only safe at a checkpoint.
-  const canSeeProfile = phase !== "phase1" && decisions.length >= 5;
+  // with unrecorded posts — only safe at a checkpoint. Round one has to be
+  // complete for the profile to have anything to show.
+  const canSeeProfile = phase !== "phase1" && r1.length >= ROUND_SIZE;
   const idx = activeIndex(phase, reflected);
 
   return (

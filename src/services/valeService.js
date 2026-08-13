@@ -16,7 +16,10 @@
 // back to that cache on network failure so a filmed demo never waits on an API call.
 // Component code should not need to change — it only calls getValeResponse().
 
-import { HEADS, RULES, MATCH, HOOKNAME, VISUAL_THEMES, VISUAL_THEME_DEFAULT } from "../data/posts";
+import {
+  HEADS, RULES, MATCH, HOOKNAME, VISUAL_THEMES, VISUAL_THEME_DEFAULT,
+  REFUSALS, REFUSAL_MESSAGES, REFUSAL_WHY,
+} from "../data/posts";
 
 export function getAudienceMatch(aud, hook) {
   if (!aud || !hook) return 0;
@@ -36,16 +39,36 @@ export function getOpeningIntroMessage(hook) {
   };
 }
 
-// Job 2: rewrite the current draft on request, e.g. "make it angrier"
+// Job 2: rewrite the current draft on request, e.g. "make it angrier".
+//
+// Refusals are checked first and deliberately so — SPEC.md §6 requires Vale to
+// refuse anything outside the fictional scenario, and several refusal triggers
+// ("a real company", "make it look real") contain words the rewrite rules also
+// match on. Checking rules first would let "write this about a real politician"
+// hit the "make it look official" rule and comply.
+//
+// A refusal returns matched:false, so nothing is logged to valeLog and the
+// headline is left alone — refusing isn't a manipulation the learner asked for,
+// and it shouldn't appear in Phase 3's "what you asked for" transcript as if it were.
 export function getValeResponse(userText) {
   const lower = userText.toLowerCase();
+
+  const refusal = REFUSALS.find((r) => r.k.some((kw) => lower.includes(kw)));
+  if (refusal) {
+    return {
+      matched: false,
+      refused: true,
+      message: { role: "vale", text: REFUSAL_MESSAGES[refusal.r], why: REFUSAL_WHY },
+    };
+  }
+
   const rule = RULES.find((r) => r.k.some((kw) => lower.includes(kw)));
   if (!rule) {
     return {
       matched: false,
       message: {
         role: "vale",
-        text: "Tell me what to change — angrier, more urgent, aimed younger, more official. I only work on this draft.",
+        text: "Tell me what to change and I'll rewrite this draft — scarier, angrier, more official, aimed younger. Use one of the suggestions below if it's easier.",
       },
     };
   }

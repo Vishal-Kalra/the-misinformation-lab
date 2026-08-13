@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useStore } from "../../store";
-import { ARTS, AUD_BASE } from "../../data/posts";
+import { ARTS, AUD_BASE, SHARE_CASCADE } from "../../data/posts";
 import { getAudienceMatch, getOpeningOptions, getOpeningIntroMessage, getValeResponse } from "../../services/valeService";
 import { addToPool, buildCommunityPost, getPoolCount } from "../../services/communityPool";
 import CampaignSetup from "./CampaignSetup";
@@ -55,6 +55,7 @@ export default function Phase2({ onPublished }) {
   const [showSpread, setShowSpread] = useState(false);
   const [selectedUid, setSelectedUid] = useState(null);
   const [imagePickerOpen, setImagePickerOpen] = useState(false);
+  const [thinking, setThinking] = useState(false);
 
   // Publishing always adds the post to the shared pool too — no separate
   // "submit to the pool" button anymore, see launch() below. poolCount is
@@ -115,18 +116,29 @@ export default function Phase2({ onPublished }) {
     swapHeadline(h);
   };
 
+  // Variable delay + a typing indicator so Vale reads as writing rather than
+  // looking something up. Refusals come back fast — a wall doesn't deliberate.
   const sendToVale = (text) => {
     setMessages((m) => [...m, { role: "user", text }]);
+    setThinking(true);
+    const result = getValeResponse(text);
+    const delay = result.refused ? 420 : 520 + Math.random() * 460;
     setTimeout(() => {
-      const result = getValeResponse(text);
+      setThinking(false);
       if (result.matched) {
         setCampaignField("head", result.headline);
         setCampaignField("match", result.match);
         swapHeadline(result.headline);
         logValeRequest(result.intent);
       }
-      setMessages((m) => [...m, { role: "vale", text: result.message.text, why: result.message.why, strong: result.matched }]);
-    }, 620);
+      setMessages((m) => [...m, {
+        role: "vale",
+        text: result.message.text,
+        why: result.message.why,
+        strong: result.matched,
+        refused: result.refused,
+      }]);
+    }, delay);
   };
 
   // Typed directly on the canvas — no fade transition, just a live edit.
@@ -191,6 +203,21 @@ export default function Phase2({ onPublished }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Keyboard equivalent of dropping a signal on the canvas. Stacks each new
+  // one down and across a little so several placed this way don't land on top
+  // of each other; they're draggable afterwards like any other.
+  const placeArtifactByKeyboard = (art) => {
+    const n = placedArtifacts.length;
+    const uid = `${art.id}-${Date.now()}`;
+    addPlacedArtifact({
+      uid, id: art.id,
+      x: 14 + (n % 3) * 18,
+      y: 14 + n * 26,
+      scale: 1, rotation: 0, opacity: 100, text: art.h,
+    });
+    selectArtifact(uid);
+  };
+
   const onArtifactPointerDown = (uid, e) => {
     const item = placedArtifacts.find((p) => p.uid === uid);
     if (!item || !canvasRef.current) return;
@@ -209,7 +236,7 @@ export default function Phase2({ onPublished }) {
       ? [...artifacts].sort((x, y) => ARTS.find((a) => a.id === y).w - ARTS.find((a) => a.id === x).w)[0]
       : null;
     const topArt = topId ? ARTS.find((a) => a.id === topId) : null;
-    const reach = Math.round(AUD_BASE * (campaign.match / 100) * (cred / 100) * 8);
+    const reach = Math.round(AUD_BASE * (campaign.match / 100) * (cred / 100) * SHARE_CASCADE);
     setReachAndCred(reach, cred, topArt ? topArt.n : null);
 
     const signalNames = [...new Set(artifacts.map((id) => ARTS.find((a) => a.id === id)?.n).filter(Boolean))];
@@ -282,6 +309,7 @@ export default function Phase2({ onPublished }) {
                 selectedOption={selectedOption}
                 onSelectOption={selectOption}
                 onSend={sendToVale}
+                thinking={thinking}
               />
             )}
             {tab === "el" && (
@@ -289,6 +317,7 @@ export default function Phase2({ onPublished }) {
                 <ArtifactPalette
                   onShowWhy={(a) => setWhy({ n: a.n, why: a.why })}
                   onDragStart={(a) => { dragRef.current = { mode: "new", art: a }; }}
+                  onPlace={placeArtifactByKeyboard}
                 />
                 {selected ? (
                   <PropertiesPanel
@@ -302,7 +331,18 @@ export default function Phase2({ onPublished }) {
               </div>
             )}
           </div>
-          <CredibilityMeter cred={cred} onLaunch={launch} disabled={!postSource.trim() || !headline.trim()} />
+          <CredibilityMeter
+            cred={cred}
+            onLaunch={launch}
+            disabled={!postSource.trim() || !headline.trim()}
+            blockedReason={
+              !headline.trim()
+                ? "Write a headline on the post to publish."
+                : !postSource.trim()
+                  ? "Add a source name to the post to publish."
+                  : null
+            }
+          />
         </div>
       )}
 

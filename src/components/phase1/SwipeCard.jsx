@@ -64,8 +64,8 @@ export default function SwipeCard({ post, locked, flyDir, onThreshold }) {
 
   return (
     <div className="card" ref={cardRef} style={flyStyle}>
-      <div className="tag tl" ref={tlRef}>FLAG</div>
-      <div className="tag tr" ref={trRef}>TRUST</div>
+      <div className="tag tl" ref={tlRef}>FAKE</div>
+      <div className="tag tr" ref={trRef}>REAL</div>
       <div className="cmeta">
         <div className="av" style={{ background: post.av }} />
         <div>

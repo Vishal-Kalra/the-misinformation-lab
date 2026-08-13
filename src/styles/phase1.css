@@ -6,8 +6,17 @@
 .dots i { width: 5px; height: 5px; border-radius: 50%; background: #D2D5DA; }
 .dots i.on { background: var(--p1ink); }
 .cnt { font-size: 11px; color: var(--p1mute); font-variant-numeric: tabular-nums; }
-.deck { position: relative; margin: 16px 16px 0; height: 364px; }
-.card { position: absolute; inset: 0; background: var(--p1card); border: 1px solid var(--p1line); border-radius: 15px; overflow: hidden; box-shadow: 0 3px 14px rgba(16,18,28,.07); display: flex; flex-direction: column; touch-action: none; user-select: none; }
+.rnd { font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--p1mute); }
+.hint kbd {
+  font-family: var(--mono); font-size: 10px; background: var(--p1card);
+  border: 1px solid var(--p1line); border-radius: 4px; padding: 1px 5px; color: var(--p1ink);
+}
+.taskline { padding: 14px 16px 0; text-align: center; }
+.taskline b { display: block; font-size: 15px; font-weight: 600; color: var(--p1ink); }
+.taskline span { display: block; font-size: 12px; color: var(--p1mute); margin-top: 3px; }
+/* min-height, not height: a long post used to overflow a fixed 364px card. */
+.deck { position: relative; margin: 14px 16px 0; min-height: 364px; display: flex; }
+.card { position: relative; width: 100%; background: var(--p1card); border: 1px solid var(--p1line); border-radius: 15px; overflow: hidden; box-shadow: 0 3px 14px rgba(16,18,28,.07); display: flex; flex-direction: column; touch-action: none; user-select: none; }
 .cmeta { display: flex; gap: 10px; align-items: center; padding: 13px 14px 9px; }
 .av { width: 36px; height: 36px; border-radius: 50%; flex: none; }
 .nm { font-size: 14px; font-weight: 600; line-height: 1.25; }
@@ -20,13 +29,18 @@
 .tag.tl { left: 14px; color: #E04A4A; transform: rotate(-9deg); }
 .tag.tr { right: 14px; color: #12A55E; transform: rotate(9deg); }
 .acts { display: flex; gap: 9px; padding: 14px 16px 0; }
-.act { flex: 1; padding: 14px 6px; border-radius: 12px; border: 1px solid var(--p1line); background: var(--p1card); font-size: 13.5px; font-weight: 600; color: var(--p1ink); }
+.act { flex: 1; padding: 12px 6px; border-radius: 12px; border: 1px solid var(--p1line); background: var(--p1card); font-size: 14px; font-weight: 600; color: var(--p1ink); }
+.act small { display: block; font-weight: 400; font-size: 10.5px; color: var(--p1mute); margin-top: 3px; }
 .act.flag:hover { border-color: #E04A4A; color: #E04A4A; }
 .act.trust:hover { border-color: #12A55E; color: #12A55E; }
+.act.flag:hover small, .act.trust:hover small { color: inherit; opacity: .75; }
 .vbtn { width: calc(100% - 32px); margin: 9px 16px 0; padding: 12px; border-radius: 11px; border: 1px solid var(--p1line); background: var(--p1card); font-size: 13px; font-weight: 600; }
 .vbtn small { display: block; font-weight: 400; font-size: 11px; color: var(--p1mute); margin-top: 2px; }
 .hint { text-align: center; font-size: 11px; color: var(--p1mute); padding: 10px 0 0; }
-.sheet { position: absolute; left: 0; right: 0; bottom: 0; background: var(--p1card); border-radius: 16px 16px 0 0; padding: 18px 16px 22px; transform: translateY(103%); transition: transform .28s ease; box-shadow: 0 -8px 30px rgba(16,18,28,.14); z-index: 20; }
+/* Fixed, not absolute: as an absolutely-positioned child of #p1 the open sheet
+   added its own height to the page, which is how it ended up visible below the
+   phase-2 interstitial instead of over the feed. */
+.sheet { position: fixed; left: 0; right: 0; bottom: 0; background: var(--p1card); border-radius: 16px 16px 0 0; padding: 18px 16px 22px; transform: translateY(103%); transition: transform .28s ease; box-shadow: 0 -8px 30px rgba(16,18,28,.14); z-index: 40; }
 .sheet.up { transform: none; }
 .sheet h4 { margin: 0 0 3px; font-size: 15px; font-weight: 600; }
 .sheet .s { margin: 0 0 14px; font-size: 12px; color: var(--p1mute); }
@@ -55,6 +69,14 @@
 .prscore { font-family: var(--mono); font-size: 13px; font-variant-numeric: tabular-nums; }
 .prbar { height: 6px; background: #EDEFF2; border-radius: 3px; overflow: hidden; }
 .prbar i { display: block; height: 100%; background: var(--p1ink); width: 0; transition: width .8s ease; }
+/* Before/after delta — the single number the results slide is built from, so
+   it gets more weight than the two bars it summarises. */
+.pdelta { display: flex; align-items: baseline; gap: 10px; padding: 4px 2px 0; }
+.pdn { font-size: 26px; font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; color: var(--p1mute); }
+.pdelta.up .pdn { color: #12A55E; }
+.pdelta.down .pdn { color: #E04A4A; }
+.pdl { font-size: 12.5px; color: var(--p1mute); line-height: 1.4; }
+.prnote { font-size: 12.5px; color: var(--p1mute); line-height: 1.5; margin: 2px 2px 0; }
 .pbtn2 { width: calc(100% - 32px); margin: 18px 16px 20px; padding: 14px; border-radius: 11px; border: none; background: var(--p1ink); color: #fff; font-size: 13.5px; font-weight: 600; }
 /* Final profile screen — two actions instead of one, so finishing the
    reveal doesn't strand the learner with only a loop back into it. */
@@ -66,7 +88,7 @@
    instead of a fixed-width phone strip. */
 @media (min-width: 700px) {
   #p1 .bar, #prof .bar { max-width: 640px; margin: 0 auto; width: 100%; padding: 22px 8px; }
-  .deck { max-width: 440px; width: 100%; margin: 28px auto 0; height: 460px; }
+  .deck { max-width: 440px; width: 100%; margin: 28px auto 0; min-height: 460px; }
   .card { border-radius: 18px; }
   .acts { max-width: 440px; width: 100%; margin: 0 auto; padding: 18px 0 0; }
   .vbtn { max-width: 440px; width: 100%; margin: 10px auto 0; }
@@ -77,3 +99,23 @@
   .pbtn2 { max-width: 640px; width: 100%; margin: 22px auto 32px; }
   .pactions { max-width: 640px; width: 100%; margin: 22px auto 32px; }
 }
+
+/* --- surface pass: feed + profile ---------------------------------------- */
+.card { border-radius: var(--r-lg); box-shadow: var(--sh-2); border-color: rgba(16,18,28,.07); }
+.deck:hover .card { box-shadow: var(--sh-3); }
+.taskline b { letter-spacing: -.01em; }
+.act { border-radius: var(--r-md); box-shadow: var(--sh-1); border-color: rgba(16,18,28,.08); }
+.act:not(:disabled):hover { box-shadow: var(--sh-2); transform: translateY(-1px); }
+.act.flag:not(:disabled):hover { background: #FFF6F6; }
+.act.trust:not(:disabled):hover { background: #F4FCF7; }
+.vbtn { border-radius: var(--r-md); box-shadow: var(--sh-1); border-color: rgba(16,18,28,.08); text-align: left; }
+.vbtn:not(:disabled):hover { box-shadow: var(--sh-2); border-color: var(--p1act); color: var(--p1act); }
+.sheet { border-radius: var(--r-xl) var(--r-xl) 0 0; box-shadow: 0 -10px 44px rgba(16,18,28,.16); }
+.sheet .dark { border-radius: var(--r-md); }
+.av, .pav { box-shadow: inset 0 0 0 1px rgba(16,18,28,.06); }
+.ppost { border-radius: var(--r-lg); box-shadow: var(--sh-1); }
+.presult { border-radius: var(--r-md); }
+.prbar, .prbar i { border-radius: 999px; }
+.pbtn2 { border-radius: var(--r-md); box-shadow: var(--sh-1); }
+.pbtn2:not(:disabled):hover { box-shadow: var(--sh-2); transform: translateY(-1px); }
+.pdelta { border-radius: var(--r-md); }

@@ -1,4 +1,4 @@
-export default function CredibilityMeter({ cred, onLaunch, disabled }) {
+export default function CredibilityMeter({ cred, onLaunch, disabled, blockedReason }) {
   return (
     <div className="pad">
       <div className="meter">
@@ -6,9 +6,12 @@ export default function CredibilityMeter({ cred, onLaunch, disabled }) {
         <span className="mb"><i style={{ background: "var(--go)", width: cred + "%" }} /></span>
         <span className="mv">{cred}%</span>
       </div>
-      <button className="pbtn" style={{ marginBottom: 18 }} onClick={onLaunch} disabled={disabled}>
+      <button className="pbtn" onClick={onLaunch} disabled={disabled}>
         Publish to your profile
       </button>
+      {/* A disabled primary button with no stated reason is the most common way
+          a first-timer gets stuck here. */}
+      <p className="pblock">{blockedReason || " "}</p>
     </div>
   );
 }

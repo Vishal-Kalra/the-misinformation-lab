@@ -25,8 +25,10 @@ const SHOW_NAV = new Set(["phase1", "phase2", "profile"]);
 
 export default function App() {
   const phase = useStore((s) => s.phase);
+  const round = useStore((s) => s.round);
   const setPhase = useStore((s) => s.setPhase);
-  const startPhase1 = useStore((s) => s.startPhase1);
+  const startRoundOne = useStore((s) => s.startRoundOne);
+  const startRoundTwo = useStore((s) => s.startRoundTwo);
   const markReflected = useStore((s) => s.markReflected);
   const setComposerStep = useStore((s) => s.setComposerStep);
   const [interstitial, setInterstitial] = useState(null);
@@ -42,11 +44,25 @@ export default function App() {
     phase === "profile" ? BG.prof :
     BG.p3;
 
-  const goPhase2 = () =>
+  // Round 1 ends by handing the learner the other side of the screen; round 2
+  // ends by showing them what both rounds together say about them.
+  const finishRound = () => {
+    if (round === 1) {
+      setInterstitial({
+        kicker: "Phase 2", headline: "Now you run the campaign.",
+        body: "Same tools. Other side of the screen.", buttonLabel: "Open the desk",
+        next: () => setPhase("phase2"),
+      });
+    } else {
+      setPhase("phase3");
+    }
+  };
+
+  const goRoundTwo = () =>
     setInterstitial({
-      kicker: "Phase 2", headline: "Now you run the campaign.",
-      body: "Same tools. Other side of the screen.", buttonLabel: "Open the desk",
-      next: () => setPhase("phase2"),
+      kicker: "Round two", headline: "Five more posts.",
+      body: "Different town. The same four tactics you just used.", buttonLabel: "Start round two",
+      next: startRoundTwo,
     });
 
   const finishInterstitial = () => {
@@ -63,10 +79,12 @@ export default function App() {
           onProfile={() => setPhase("profile")}
         />
       )}
-      {phase === "intro" && <Intro onStart={startPhase1} />}
-      {phase === "phase1" && <Phase1 onDone={goPhase2} />}
+      {phase === "intro" && <Intro onStart={startRoundOne} />}
+      {phase === "phase1" && <Phase1 onDone={finishRound} />}
       {phase === "phase2" && <Phase2 onPublished={() => setPhase("profile")} />}
-      {phase === "profile" && <Profile onSeeResult={() => setPhase("phase3")} />}
+      {phase === "profile" && (
+        <Profile onRoundTwo={goRoundTwo} onSeeResult={() => setPhase("phase3")} />
+      )}
       {phase === "phase3" && <Phase3 onDone={() => { markReflected(); setPhase("profile"); }} />}
       {interstitial && (
         <Interstitial

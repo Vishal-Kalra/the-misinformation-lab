@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" width="480" height="320" preserveAspectRatio="xMidYMid slice" role="img">
+<defs>
+<filter id="far" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="4.2"/></filter>
+<filter id="mid" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="1.5"/></filter>
+<filter id="near" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="2.6"/></filter>
+<filter id="soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="9"/></filter>
+<radialGradient id="vig" cx="50%" cy="46%" r="72%">
+  <stop offset="55%" stop-color="#000" stop-opacity="0"/>
+  <stop offset="100%" stop-color="#000" stop-opacity="0.42"/>
+</radialGradient>
+<filter id="grain" x="0" y="0" width="100%" height="100%">
+  <feTurbulence type="fractalNoise" baseFrequency="0.72" numOctaves="3" stitchTiles="stitch"/>
+  <feColorMatrix type="saturate" values="0"/>
+</filter>
+<linearGradient id="sheet" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFFEFA"/><stop offset=".6" stop-color="#F4EFE4"/><stop offset="1" stop-color="#DED7C7"/></linearGradient>
+<radialGradient id="desklight" cx="42%" cy="30%" r="62%"><stop offset="0" stop-color="#FFF3D8" stop-opacity=".9"/><stop offset="1" stop-color="#FFF3D8" stop-opacity="0"/></radialGradient>
+</defs>
+<rect width="480" height="320" fill="#4A4438"/>
+<rect width="480" height="320" fill="url(#desklight)"/>
+<g filter="url(#far)" opacity=".6"><rect x="330" y="0" width="150" height="320" fill="#3B362C"/></g>
+<g transform="rotate(6 250 170)" opacity=".85" filter="url(#mid)">
+  <rect x="150" y="52" width="200" height="252" rx="2" fill="#2E2A22" opacity=".35" transform="translate(8 10)"/>
+  <rect x="150" y="52" width="200" height="252" rx="2" fill="#E8E1D2"/>
+</g>
+<g transform="rotate(-3.5 230 160)">
+  <rect x="92" y="30" width="252" height="266" rx="2" fill="#2A261F" opacity=".42" transform="translate(10 13)"/>
+  <rect x="92" y="30" width="252" height="266" rx="2" fill="url(#sheet)"/>
+  <rect x="120" y="58" width="118" height="11" rx="4" fill="#A99C80"/>
+  <rect x="120" y="78" width="168" height="6" rx="3" fill="#CEC4AE"/>
+  <rect x="120" y="94" width="86" height="6" rx="3" fill="#DAD1BD"/>
+  <rect x="120" y="122" width="196" height="5" rx="2.5" fill="#D6CCB7"/><rect x="120" y="134" width="196" height="5" rx="2.5" fill="#D6CCB7"/><rect x="120" y="146" width="164" height="5" rx="2.5" fill="#D6CCB7"/><rect x="120" y="176" width="196" height="5" rx="2.5" fill="#D6CCB7"/><rect x="120" y="188" width="182" height="5" rx="2.5" fill="#D6CCB7"/><rect x="120" y="200" width="196" height="5" rx="2.5" fill="#D6CCB7"/><rect x="120" y="212" width="128" height="5" rx="2.5" fill="#D6CCB7"/><rect x="120" y="248" width="196" height="5" rx="2.5" fill="#D6CCB7"/><rect x="120" y="260" width="104" height="5" rx="2.5" fill="#D6CCB7"/>
+  <rect x="120" y="158" width="112" height="11" rx="1" fill="#26221A" opacity=".82"/>
+  <rect x="176" y="224" width="82" height="11" rx="1" fill="#26221A" opacity=".82"/>
+  <rect x="252" y="248" width="60" height="34" rx="2" fill="#B94A3A" opacity=".18"/>
+  <rect x="252" y="248" width="60" height="34" rx="2" fill="none" stroke="#B94A3A" stroke-width="2.5" opacity=".55"/>
+</g>
+<g filter="url(#near)" opacity=".7"><rect x="0" y="292" width="480" height="28" fill="#332F27"/></g>
+<linearGradient id="grade" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#FFE9BE" stop-opacity=".2"/>
+  <stop offset="1" stop-color="#2A2318" stop-opacity=".2"/>
+</linearGradient>
+<rect width="480" height="320" fill="url(#grade)"/>
+<rect width="480" height="320" fill="url(#vig)"/>
+<rect width="480" height="320" filter="url(#grain)" opacity="0.085"/>
+</svg>

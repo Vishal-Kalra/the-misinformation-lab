@@ -1,5 +1,13 @@
 #p3 { background: #fff; color: var(--p3ink); font-family: "Newsreader", serif; padding: 30px 26px 22px; cursor: pointer; }
-.plab { font-family: var(--mono); font-size: 9.5px; letter-spacing: .18em; text-transform: uppercase; color: var(--p3mute); margin-bottom: 22px; }
+.plab { font-family: var(--mono); font-size: 9.5px; letter-spacing: .18em; text-transform: uppercase; color: var(--p3mute); margin-bottom: 22px; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.pcount { letter-spacing: .1em; color: #B5B5B5; }
+#p3:focus-visible { outline: 2px solid var(--mark); outline-offset: -4px; }
+/* Both rounds side by side — the delta only reads if you can see the two
+   grids at once. Stacks on narrow screens. */
+.rgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin: 2px 0 18px; }
+.rgk { font-family: var(--mono); font-size: 9px; letter-spacing: .13em; text-transform: uppercase; color: var(--p3mute); margin-bottom: 8px; }
+.rgrid .g9 { grid-template-columns: repeat(5,1fr); gap: 5px; margin: 0; }
+@media (max-width: 400px) { .rgrid { grid-template-columns: 1fr; gap: 14px; } }
 .beat { opacity: 0; transform: translateY(9px); transition: opacity .7s, transform .7s; flex: 1; }
 .beat.in { opacity: 1; transform: none; }
 .lede { font-size: 15.5px; font-weight: 300; color: #3A3A3A; line-height: 1.55; margin: 0 0 18px; }
@@ -29,8 +37,29 @@
 .pv { font-size: 27px; letter-spacing: -.02em; color: var(--mark); line-height: 1.1; margin-bottom: 15px; }
 .habit { border-top: 1px solid var(--p3ink); padding-top: 14px; font-size: 13.5px; line-height: 1.5; color: #333; }
 .habit b { font-weight: 500; color: var(--p3ink); }
-.pfoot { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; padding-top: 13px; border-top: 1px solid var(--p3line); font-family: var(--mono); font-size: 10px; letter-spacing: .1em; color: var(--p3mute); flex: none; }
+.pfoot { display: flex; justify-content: space-between; align-items: center; gap: 14px; margin-top: 18px; padding-top: 13px; border-top: 1px solid var(--p3line); font-family: var(--mono); font-size: 10px; letter-spacing: .1em; color: var(--p3mute); flex: none; }
 .pfoot .adv { color: var(--p3ink); }
+.pnav { display: flex; gap: 8px; align-items: center; }
+.pnavb {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em;
+  padding: 9px 15px; border-radius: 8px; border: 1px solid var(--p3line);
+  background: #fff; color: var(--p3mute);
+}
+.pnavb:hover:not(:disabled) { border-color: var(--p3ink); color: var(--p3ink); }
+.pnavb:disabled { opacity: .35; }
+.pnavb-go { background: var(--p3ink); border-color: var(--p3ink); color: #fff; }
+/* Specificity, not colour, was the bug here: `.pnavb:hover:not(:disabled)`
+   scores (0,3,0) and beat a plain `.pnavb-go:hover` at (0,2,0), so the generic
+   rule's dark ink won on the dark button and the label went black-on-black.
+   Matching the shape of the generic selector puts this back in front. */
+.pnavb-go:hover:not(:disabled) { background: #000; color: #fff; border-color: #000; }
+/* Legends — the coloured cells and bars carried meaning nothing explained. */
+.legend { display: flex; flex-wrap: wrap; gap: 16px; margin: 0 0 14px; font-family: var(--mono); font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--p3mute); }
+.legend span { display: flex; align-items: center; gap: 6px; }
+.sw { width: 10px; height: 10px; border-radius: 3px; border: 1px solid var(--p3line); background: #fff; display: inline-block; }
+.sw.bad { background: var(--mark); border-color: var(--mark); }
+.sw.grey { background: #C9C9C9; border-color: #C9C9C9; }
+.sw.out { background: #fff; }
 .dot { display: inline-block; width: 4px; height: 4px; border-radius: 50%; background: #DADADA; margin-right: 4px; }
 .debrow { display: flex; gap: 11px; padding: 10px 0; border-bottom: 1px solid var(--p3line); }
 .debidx { font-family: var(--mono); font-size: 10px; color: var(--p3mute); width: 16px; flex: none; padding-top: 2px; }
@@ -50,3 +79,11 @@
   .pv { font-size: 34px; }
   .habit { font-size: 15px; max-width: 56ch; }
 }
+
+/* --- surface pass: report ------------------------------------------------- */
+.cell { border-radius: var(--r-sm); }
+.tmb, .tmb i { border-radius: 999px; }
+.chip { transition: background .18s var(--e-soft), border-color .18s var(--e-soft); }
+.pnavb { transition: border-color .18s var(--e-soft), color .18s var(--e-soft), background .18s var(--e-soft), transform .12s var(--e-out); }
+.pnavb:not(:disabled):hover { transform: translateY(-1px); }
+.beat { transition: opacity .6s var(--e-out), transform .6s var(--e-out); }

@@ -5,7 +5,7 @@ import { ARTS } from "../../data/posts";
 // only forces the DOM to match `value` when they've actually diverged
 // (i.e. the change came from elsewhere — Vale, an option pick — not from
 // the user's own keystroke, which already updated `value` to match).
-function EditableText({ value, onChange, className, editable }) {
+function EditableText({ value, onChange, className, editable, label }) {
   const ref = useRef(null);
   useEffect(() => {
     if (ref.current && ref.current.textContent !== value) {
@@ -16,9 +16,11 @@ function EditableText({ value, onChange, className, editable }) {
   return (
     <div
       ref={ref}
-      className={className}
+      className={`${className} edt`}
       contentEditable
       suppressContentEditableWarning
+      role="textbox"
+      aria-label={label}
       onInput={(e) => onChange(e.currentTarget.textContent)}
       onPointerDown={(e) => e.stopPropagation()}
     />
@@ -47,12 +49,19 @@ const PostCanvas = forwardRef(function PostCanvas(
 ) {
   return (
     <div className={`canvas ${hot ? "hot" : ""}`} ref={ref} onPointerDown={editable ? onCanvasPointerDown : undefined}>
-      <EditableText className="k-src" value={source} onChange={onSourceChange} editable={editable} />
+      <EditableText
+        className="k-src"
+        value={source}
+        onChange={onSourceChange}
+        editable={editable}
+        label="Post source name"
+      />
       <EditableText
         className={`k-hl ${headlineSwapping ? "sw" : ""}`}
         value={headline}
         onChange={onHeadlineChange}
         editable={editable}
+        label="Post headline"
       />
       <div
         className={`k-img ${editable ? "swap" : ""}`}

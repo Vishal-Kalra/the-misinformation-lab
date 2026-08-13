@@ -3,15 +3,15 @@
 // SPEC.md §8 is explicit: no database, session state in memory only. A real
 // cross-user shared feed would need a real backend — out of scope here. This
 // is the local-only compromise: every campaign post published in Phase 2 is
-// saved to localStorage, and store.js's startPhase1() always pulls a random
-// 5 from the fixed seed content plus this pool. So "the community's fakes
-// show up in your feed" works for repeat play/testing on one browser,
-// without standing up a database.
+// saved to localStorage and mixed into a later **round two**.
+//
+// Round one never draws from this pool. It is the fixed baseline every
+// tester's before/after is measured against, so polluting it with
+// learner-authored posts would make the eight sessions incomparable and the
+// delta meaningless. See store.js's startRoundOne() / startRoundTwo().
 //
 // There's no separate "Contribute" step anymore — publishing to the profile
-// and adding the post to this pool are the same action (Phase2.jsx's
-// launch()), and there's no Round 2 to gate it behind; it feeds whatever the
-// *next* Phase 1 session draws.
+// and adding the post to this pool are the same action (Phase2.jsx's launch()).
 
 const KEY = "misinfo-lab:community-pool";
 

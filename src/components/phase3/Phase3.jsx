@@ -2,8 +2,15 @@ import { useEffect, useMemo, useState } from "react";
 import { useStore, accuracyPct } from "../../store";
 import { ARTS, HOOKNAME, PROFILE } from "../../data/posts";
 
+const LABELS = [
+  "Both rounds", "Decision speed", "What you asked for", "Signals",
+  "Side by side", "Your vulnerability", "Debrief",
+];
+const LAST = LABELS.length - 1;
+
 export default function Phase3({ onDone }) {
-  const decisions = useStore((s) => s.decisions);
+  const r1 = useStore((s) => s.r1);
+  const r2 = useStore((s) => s.r2);
   const valeLog = useStore((s) => s.valeLog);
   const artifacts = useStore((s) => s.artifacts);
   const campaign = useStore((s) => s.campaign);
@@ -13,7 +20,7 @@ export default function Phase3({ onDone }) {
   const [entered, setEntered] = useState(false);
 
   const data = useMemo(() => {
-    const A = decisions;
+    const A = [...r1, ...r2];
     const wrong = A.filter((d) => !d.correct);
     const right = A.filter((d) => d.correct);
     const avgW = wrong.length ? wrong.reduce((s, d) => s + d.ms, 0) / wrong.length / 1000 : 0;
@@ -21,16 +28,16 @@ export default function Phase3({ onDone }) {
     const missed = [...new Set(wrong.flatMap((d) => d.signals))];
     const used = artifacts.map((id) => ARTS.find((a) => a.id === id).n);
     const overlap = used.filter((u) => missed.includes(u));
-    const prof = PROFILE[campaign.hook];
     const trusted = A.find((d) => !d.correct && d.fake);
-    const acc = accuracyPct(A);
+    const before = accuracyPct(r1);
+    const after = accuracyPct(r2);
     const seen = {};
     const vl = valeLog.filter((x) => (seen[x] = (seen[x] || 0) + 1) === 1).map((x) => {
       const c = valeLog.filter((y) => y === x).length;
       return c > 1 ? `${x} ×${c}` : x;
     });
-    return { A, wrong, right, avgW, avgR, missed, used, overlap, prof, trusted, acc, vl };
-  }, [decisions, valeLog, artifacts, campaign]);
+    return { A, r1, r2, wrong, right, avgW, avgR, missed, used, overlap, trusted, before, after, vl };
+  }, [r1, r2, valeLog, artifacts]);
 
   useEffect(() => {
     setEntered(false);
@@ -39,18 +46,46 @@ export default function Phase3({ onDone }) {
   }, [b]);
 
   const advance = () => {
-    if (b < 6) setB(b + 1);
+    if (b < LAST) setB(b + 1);
     else onDone();
   };
+  const back = () => setB((n) => Math.max(0, n - 1));
 
-  const labels = [
-    "Your round", "Decision speed", "What you asked for", "Signals",
-    "Side by side", "Your vulnerability", "Debrief",
-  ];
+  // The reveal is the screen the whole app builds toward, so it can't be
+  // mouse-only. Enter/Space advance, ← steps back for anyone who overshoots
+  // and would otherwise lose the vulnerability beat with no way to return.
+  useEffect(() => {
+    const onKey = (e) => {
+      // The debrief beat has its own buttons. Enter/Space on one of those means
+      // "pick this reason", not "advance the reveal" — without this guard a
+      // keyboard user answering the reflection question also skips the beat.
+      if (e.target.closest?.("button")) return;
+      if (e.key === "Enter" || e.key === " " || e.key === "ArrowRight") {
+        e.preventDefault();
+        advance();
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        back();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [b]);
 
   return (
-    <section id="p3" className="scr" onClick={advance}>
-      <div className="plab">{labels[b]}</div>
+    <section
+      id="p3"
+      className="scr"
+      onClick={advance}
+      role="button"
+      tabIndex={0}
+      aria-label={`${LABELS[b]}. Beat ${b + 1} of ${LABELS.length}. Press Enter to continue.`}
+    >
+      <div className="plab">
+        {LABELS[b]}
+        <span className="pcount">{b + 1} of {LABELS.length}</span>
+      </div>
       <div className={`beat ${entered ? "in" : ""}`}>
         {b === 0 && <BeatBoth data={data} />}
         {b === 1 && <BeatSpeed data={data} />}
@@ -60,33 +95,75 @@ export default function Phase3({ onDone }) {
         {b === 5 && <BeatVulnerability data={data} campaign={campaign} />}
         {b === 6 && <BeatDebrief data={data} />}
       </div>
+      {/* Advancing by clicking anywhere was the only way forward and nothing
+          said so, so the reveal could stall on its first screen. There's now a
+          real button, and stepping back is visible rather than a hidden key. */}
       <div className="pfoot">
-        <span>
-          {labels.map((_, i) => (
+        <span className="pdots">
+          {LABELS.map((_, i) => (
             <i key={i} className="dot" style={{ background: i <= b ? "#111" : "#DADADA" }} />
           ))}
         </span>
-        <span className="adv">{b === 6 ? "BACK TO PROFILE →" : "TAP TO CONTINUE →"}</span>
+        <span className="pnav">
+          <button
+            className="pnavb"
+            onClick={(e) => { e.stopPropagation(); back(); }}
+            disabled={b === 0}
+          >
+            ← Back
+          </button>
+          <button className="pnavb pnavb-go" onClick={(e) => { e.stopPropagation(); advance(); }}>
+            {b === LAST ? "Back to profile" : "Next"} →
+          </button>
+        </span>
       </div>
     </section>
   );
 }
 
 function BeatBoth({ data }) {
-  const { A, wrong, acc } = data;
+  const { r1, r2, before, after } = data;
+  const delta = after - before;
   return (
     <>
-      <p className="lede">You reviewed five posts before you built one of your own.</p>
-      <div className="g9">
-        {A.map((d, i) => (
-          <div key={i} className={`cell in ${d.correct ? "" : "bad"}`}>{String(i + 1).padStart(2, "0")}</div>
-        ))}
-      </div>
       <p className="lede">
-        You got <b>{acc}%</b> right.{" "}
-        {wrong.length
-          ? `The ${wrong.length} you missed used the same tactics you reached for a few minutes later.`
-          : "You caught every one — worth remembering once you see what you built next."}
+        Each square is one post you judged. Round one was before you built a fake of your own;
+        round two was after.
+      </p>
+      <div className="legend">
+        <span><i className="sw" /> Got it right</span>
+        <span><i className="sw bad" /> Got it wrong</span>
+      </div>
+      <div className="rgrid">
+        <div className="rg">
+          <div className="rgk">Round one — before · {before}% right</div>
+          <div className="g9">
+            {r1.map((d, i) => (
+              <div key={i} className={`cell in ${d.correct ? "" : "bad"}`}>{String(i + 1).padStart(2, "0")}</div>
+            ))}
+          </div>
+        </div>
+        <div className="rg">
+          <div className="rgk">Round two — after · {after}% right</div>
+          <div className="g9">
+            {r2.map((d, i) => (
+              <div key={i} className={`cell in ${d.correct ? "" : "bad"}`}>{String(r1.length + i + 1).padStart(2, "0")}</div>
+            ))}
+          </div>
+        </div>
+      </div>
+      <p className="big">
+        {delta > 0 ? (
+          <>You went from {before}% to {after}%. <em>{delta} points better</em> after you built one yourself.</>
+        ) : delta < 0 ? (
+          <>You went from {before}% to {after}%. Building one made you <em>{Math.abs(delta)} points worse</em>.</>
+        ) : (
+          <>You scored <em>{before}% both times</em>. Building one changed nothing.</>
+        )}
+      </p>
+      <p className="sm">
+        Same four tactics both rounds. Different town, different names — so this measures whether you
+        learned the tactic, not whether you remembered the answer.
       </p>
     </>
   );
@@ -96,7 +173,13 @@ function BeatSpeed({ data }) {
   const { A, wrong, avgW, avgR } = data;
   return (
     <>
-      <p className="lede">How long each decision took.</p>
+      <p className="lede">
+        How long you spent on each post before deciding. Longer bar, longer thought.
+      </p>
+      <div className="legend">
+        <span><i className="sw grey" /> Got it right</span>
+        <span><i className="sw bad" /> Got it wrong</span>
+      </div>
       <div>
         {A.map((d, i) => (
           <div key={i} className={`tmr ${d.correct ? "" : "bad"}`}>
@@ -119,10 +202,13 @@ function BeatSpeed({ data }) {
 }
 
 function BeatAsked({ data }) {
-  const { vl } = data;
+  const { vl, A } = data;
   return (
     <>
-      <p className="lede">Every change you asked Vale to make.</p>
+      <p className="lede">
+        When you built your own post, Vale did what you told it to. This is the list of
+        what you told it.
+      </p>
       <div className="chips">
         {vl.length ? vl.map((x, i) => <span key={i} className="chip hit">{x}</span>) : <span className="chip">You took the first option</span>}
       </div>
@@ -134,7 +220,7 @@ function BeatAsked({ data }) {
       ) : (
         <>
           <p className="big">You took what was offered <em>without asking questions</em>.</p>
-          <p className="sm">That's the same reflex the five posts you just reviewed were built for.</p>
+          <p className="sm">That's the same reflex the {A.length} posts you just reviewed were built for.</p>
         </>
       )}
     </>
@@ -145,7 +231,14 @@ function BeatSignals({ data }) {
   const { missed, used, overlap } = data;
   return (
     <>
-      <p className="lede">Signals on the posts that got past you.</p>
+      <p className="lede">
+        These are the credibility signals — verified ticks, named sources, big numbers —
+        that were sitting on the posts you got wrong.
+      </p>
+      <div className="legend">
+        <span><i className="sw bad" /> You used this one too</span>
+        <span><i className="sw out" /> You didn't</span>
+      </div>
       <div className="chips">
         {missed.length ? missed.map((s, i) => <span key={i} className={`chip ${used.includes(s) ? "hit" : ""}`}>{s}</span>) : <span className="chip">None got past you</span>}
       </div>
@@ -164,7 +257,10 @@ function BeatSideBySide({ data, campaign, reach }) {
   const shown = trusted || A[0];
   return (
     <>
-      <p className="lede">Read these next to each other.</p>
+      <p className="lede">
+        On the left, a post from the feed. On the right, the one you wrote. Read them next
+        to each other.
+      </p>
       <div className="pair">
         <div className="half">
           <div className="k">{trusted ? "You trusted" : "You flagged"}</div>
@@ -180,11 +276,12 @@ function BeatSideBySide({ data, campaign, reach }) {
   );
 }
 
-function BeatVulnerability({ campaign }) {
+function BeatVulnerability({ data, campaign }) {
   const prof = PROFILE[campaign.hook];
+  const total = data.A.length;
   return (
     <>
-      <p className="lede">Across five decisions and one campaign, one pattern held.</p>
+      <p className="lede">Across {total} decisions and one campaign, one pattern held.</p>
       <p className="sm" style={{ marginBottom: 22 }}>
         You reached for {HOOKNAME[campaign.hook]} the moment you had the tools — and it was the fastest thing to reach for.
       </p>
@@ -209,7 +306,7 @@ function BeatDebrief({ data }) {
   const [picked, setPicked] = useState({});
   return (
     <>
-      <p className="lede">All five posts, explained.</p>
+      <p className="lede">All {A.length} posts, explained.</p>
       {A.map((d, i) => (
         <div key={i} className="debrow">
           <span className="debidx">{String(i + 1).padStart(2, "0")}</span>

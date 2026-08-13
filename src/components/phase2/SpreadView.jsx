@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { AUD_BASE } from "../../data/posts";
+import { AUD_BASE, SHARE_CASCADE } from "../../data/posts";
 
 export default function SpreadView({ show, reach, match, cred, topArtName, poolCount, onContinue }) {
   const canvasRef = useRef(null);
@@ -10,7 +10,12 @@ export default function SpreadView({ show, reach, match, cred, topArtName, poolC
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     const cx = 200, cy = 200;
-    const take = (cred / 100) * 0.85;
+    // The fraction of the network that actually picks the post up has to be
+    // the same arithmetic printed underneath it (match × credibility) —
+    // otherwise the animation quietly contradicts the number it's illustrating.
+    // The 0.85 ceiling is SPEC.md §4: roughly 15% of nodes stay grey even at
+    // full strength, because a post that reaches everyone looks invented.
+    const take = (match / 100) * (cred / 100) * 0.85;
     const nodes = Array.from({ length: 170 }, () => {
       const a = Math.random() * 6.28, r = Math.random() * 178;
       return { x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r, d: r, t: Math.random() < take };
@@ -50,7 +55,7 @@ export default function SpreadView({ show, reach, match, cred, topArtName, poolC
     };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
-  }, [show, reach, cred]);
+  }, [show, reach, cred, match]);
 
   if (!show) return null;
 
@@ -58,7 +63,13 @@ export default function SpreadView({ show, reach, match, cred, topArtName, poolC
     <div id="spread" className="show">
       <canvas id="cv" ref={canvasRef} width="400" height="400" />
       <div className="num">{displayed.toLocaleString()}</div>
-      <div className="numsub">{AUD_BASE.toLocaleString()} × {match}% match × {cred}% credibility</div>
+      {/* Spelled out in full so it actually resolves to the number above it.
+          It used to print "2,400 × match% × credibility%" while the reach also
+          multiplied by the 8-share cascade — so the sum on screen came to an
+          eighth of the figure it was supposed to explain. */}
+      <div className="numsub">
+        {AUD_BASE.toLocaleString()} followers × {match}% match × {cred}% credibility × {SHARE_CASCADE} reshares each
+      </div>
       <div className="numline">
         {topArtName
           ? <>The {topArtName.toLowerCase()} did the most work — and you drew it yourself.</>
