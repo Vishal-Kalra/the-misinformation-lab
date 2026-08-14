@@ -94,9 +94,20 @@ const SCENE = Object.fromEntries(
 
 export const sceneBackground = (scene) => `url("${scene.img}") center/cover`;
 
-// Keyword-matched fallback for the composer's "match one to my headline" button.
-export const VISUAL_THEMES = SCENES;
-export const VISUAL_THEME_DEFAULT = pick("townhall");
+// The composer canvas starts on this. It used to fall back to a flat CSS
+// gradient, which meant the post a learner builds looked nothing like the
+// photographed posts they had just been judging — and the whole point of Phase 2
+// is that they are building the same kind of object.
+export const DEFAULT_POST_IMAGE = SCENE.reservoir;
+
+// Keyword matching for the composer's "match one to my headline" button.
+//
+// Keywords come from the drawn set, which carries the richer synonym lists, but
+// the image resolves through pick() so a photograph wins when one exists. Using
+// SCENES directly matched the drawn SVG instead, which meant rewriting a
+// headline swapped a photo for vector art mid-compose.
+export const VISUAL_THEMES = DRAWN_SCENES.map((s) => ({ ...s, img: pick(s.id).img }));
+export const VISUAL_THEME_DEFAULT = VISUAL_THEMES.find((s) => s.id === "townhall");
 
 export const R1 = [
   {
@@ -317,3 +328,19 @@ export const PROFILE = {
 // the arithmetic used to compute reach can never drift apart.
 export const AUD_BASE = 2400;
 export const SHARE_CASCADE = 8;
+
+// Floor. Credibility signals are optional, and with none placed the product is
+// exactly zero — which reads on screen as a broken counter rather than as a
+// result. Zero isn't true either: a post is still seen by the people who
+// already follow the account, they just don't pass it on. So an unsignalled
+// post bottoms out here instead of at nothing, and the spread screen says
+// plainly that this is the floor rather than a spread.
+export const ORGANIC_REACH = 310;
+
+// The one place reach is calculated. Both the number on the spread screen and
+// the arithmetic printed underneath it come from this, so they cannot disagree
+// — which they previously did, by a factor of eight.
+export function computeReach(match, cred) {
+  const spread = Math.round(AUD_BASE * (match / 100) * (cred / 100) * SHARE_CASCADE);
+  return { spread, reach: Math.max(ORGANIC_REACH, spread), organicOnly: spread < ORGANIC_REACH };
+}

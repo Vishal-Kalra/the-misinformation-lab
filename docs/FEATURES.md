@@ -18,6 +18,7 @@ What each screen does, in the order a learner hits them. Section numbers referen
 - **Decision time is logged in milliseconds** from the moment the card appears to the moment you commit — this is the data Phase 3's "decision speed" beat is built from.
 - **Verify tools**: an optional sheet showing outlet registration, first-published date, and when the image was first seen — real signal, no verdict. Opening it is itself logged (`verified: true` on the decision). The button is honest about the cost: it says the clock keeps running, rather than the old "costs you 20 seconds", which implied a penalty that was never actually applied. Esc closes it; focus is trapped while open and returned afterwards.
 - Each decision is announced to screen readers via a live region, since the card flying off-screen is otherwise the only feedback.
+- **Zero WCAG 2.1 AA violations**, verified with axe-core across all fourteen screens (see `docs/TECH_STACK.md`).
 - **Round 1 is the fixed baseline** — always the Riverton set, never touched by the community pool. That's what makes one tester's score comparable to another's, and what the round-2 delta is measured against.
 - **Round 2** uses a **different fictional town** (Eastvale) with the **same four manipulation tactics**, so improvement measures tactic recognition rather than memorized answers (§7). Posts published through Phase 2 on this browser mix into round 2 only, and only into its three fake slots.
 
@@ -30,6 +31,7 @@ What each screen does, in the order a learner hits them. Section numbers referen
   - Free-text rewrite requests ("make it scarier", "add numbers", "make it personal", "make people share it"…) are keyword-matched against a rule set and rewrite the current headline, **always stating the tactic used**.
   - **Refuses anything outside the scenario** (§6) — naming a real person, organisation or event, or asking for something off-scenario entirely, gets an in-character decline rather than a rewrite. Refusals are not logged as requests, because refusing isn't a manipulation the learner asked for.
   - **Every accepted request is logged** (`valeLog`) — this is what Phase 3 beat 3 calls back to.
+  - A **standing disclosure** sits under the chat, permanently visible: *"Vale is an AI. It can be wrong. It argues for whatever you ask it to argue for — that's the point of it."* An app about being misled by confident text cannot present its own AI as authoritative.
 - **Credibility signal artifacts** (Verified tick, Breaking label, "N friends shared this", named source, engagement numbers) — drag from the palette onto the post canvas, **or press Enter on one to place it** without a pointer. Each explains *why* it works when you hover/select it.
 - **The post itself is editable in place** — headline and source are click-to-type, with a persistent dashed underline marking them as editable (hover-only cues don't exist on touch).
 - **Image**: a curated set of ten illustrated scenes, a keyword match against your headline, or **your own uploaded photo** (downscaled and re-encoded on-device; it never leaves the browser). Real photographs dropped into `src/assets/images/photos/` join the same picker automatically and take precedence over the drawings. See the ethics note below.
@@ -47,7 +49,7 @@ So the accurate claim is **not** "a sandbox that cannot produce a usable fake" (
 - Vale refuses any real name, organisation or event, and any off-scenario request.
 - Nothing is transmitted anywhere: no account, no server, no analytics. Uploaded images are processed on the learner's own device.
 
-Anyone describing this project — deck, video, write-up — should use that second framing, not the first.
+Anyone describing this project — deck, video, write-up — should use that second framing, not the first. The full position, including AI governance and the standing disclosure shown under Vale, is in [`ETHICS.md`](ETHICS.md).
 
 ## Profile
 

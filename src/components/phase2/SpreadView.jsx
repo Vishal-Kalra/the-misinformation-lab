@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { AUD_BASE, SHARE_CASCADE } from "../../data/posts";
+import { AUD_BASE, SHARE_CASCADE, computeReach } from "../../data/posts";
 
 export default function SpreadView({ show, reach, match, cred, topArtName, poolCount, onContinue }) {
   const canvasRef = useRef(null);
@@ -15,7 +15,9 @@ export default function SpreadView({ show, reach, match, cred, topArtName, poolC
     // otherwise the animation quietly contradicts the number it's illustrating.
     // The 0.85 ceiling is SPEC.md §4: roughly 15% of nodes stay grey even at
     // full strength, because a post that reaches everyone looks invented.
-    const take = (match / 100) * (cred / 100) * 0.85;
+    // Floor the lit fraction too — an all-grey network beside a non-zero
+    // counter would contradict it.
+    const take = Math.max(0.05, (match / 100) * (cred / 100) * 0.85);
     const nodes = Array.from({ length: 170 }, () => {
       const a = Math.random() * 6.28, r = Math.random() * 178;
       return { x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r, d: r, t: Math.random() < take };
@@ -59,6 +61,10 @@ export default function SpreadView({ show, reach, match, cred, topArtName, poolC
 
   if (!show) return null;
 
+  // Recomputed from the same function that produced the stored reach, so the
+  // caption can never describe a different sum from the one on screen.
+  const { organicOnly } = computeReach(match, cred);
+
   return (
     <div id="spread" className="show">
       <canvas id="cv" ref={canvasRef} width="400" height="400" />
@@ -68,12 +74,14 @@ export default function SpreadView({ show, reach, match, cred, topArtName, poolC
           multiplied by the 8-share cascade — so the sum on screen came to an
           eighth of the figure it was supposed to explain. */}
       <div className="numsub">
-        {AUD_BASE.toLocaleString()} followers × {match}% match × {cred}% credibility × {SHARE_CASCADE} reshares each
+        {organicOnly
+          ? <>Your own followers, and nobody else — {cred}% credibility means nothing was passed on</>
+          : <>{AUD_BASE.toLocaleString()} followers × {match}% match × {cred}% credibility × {SHARE_CASCADE} reshares each</>}
       </div>
       <div className="numline">
         {topArtName
           ? <>The {topArtName.toLowerCase()} did the most work — and you drew it yourself.</>
-          : <>No credibility signals, no reach worth mentioning — that's the correlation, not a coincidence.</>}
+          : <>You added no credibility signals, so it went no further than the people already following you. That gap is what the signals buy.</>}
       </div>
       <div className="numline" style={{ marginTop: 6, fontSize: 11, opacity: 0.7 }}>
         Added to the shared pool — <b>{poolCount}</b> post{poolCount === 1 ? "" : "s"} in it now, yours included.

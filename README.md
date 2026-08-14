@@ -46,7 +46,7 @@ Intro
   → Profile               before / after / delta
 ```
 
-See [`docs/FEATURES.md`](docs/FEATURES.md) for what each screen actually does, [`docs/TECH_STACK.md`](docs/TECH_STACK.md) for how it's built and why, and [`docs/SPEC.md`](docs/SPEC.md) for the original build spec everything above was built from.
+See [`docs/FEATURES.md`](docs/FEATURES.md) for what each screen actually does, [`docs/TECH_STACK.md`](docs/TECH_STACK.md) for how it's built and why, [`docs/ETHICS.md`](docs/ETHICS.md) for the ethics and AI-governance position, [`docs/VIDEO_SCRIPT.md`](docs/VIDEO_SCRIPT.md) for the submission video, and [`docs/SPEC.md`](docs/SPEC.md) for the original build spec.
 
 ---
 

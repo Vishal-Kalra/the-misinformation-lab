@@ -120,13 +120,13 @@ para(tf, "It fools them anyway.", 40, RGBColor(0xC9,0xC2,0xE8), SERIF, italic=Tr
 tf = tb(s1, 0.9, 4.15, 6.5, 1.5)
 para(tf, "Media literacy is taught as knowledge — spot the red flags, check the "
          "source. But recognition was never the failure point. Speed is. A student "
-         "who can define misinformation in a classroom still reshares it in four "
-         "seconds on a phone.", 14, PALE_MUTE, SANS, line=1.55, first=True)
+         "who can define misinformation in a classroom will still reshare it on a "
+         "phone without stopping to think.", 14, PALE_MUTE, SANS, line=1.55, first=True)
 
 # two evidence cards
 for i, (num, cap) in enumerate([
-    ("11%", "of 11–17s can reliably tell a real news story from a fake one"),
-    ("#1", "short-term global risk, ahead of extreme weather and conflict"),
+    ("2%", "of children have the critical literacy skills to tell a real news story from a fake one"),
+    ("3 yrs", "running as one of the most severe global risks, per the World Economic Forum"),
 ]):
     x = 8.05 + i * 2.35
     block(s1, x, 1.35, 2.05, 1.9, RGBColor(0x16,0x16,0x1C))
@@ -136,7 +136,7 @@ for i, (num, cap) in enumerate([
     para(tf, cap, 9, PALE_MUTE, SANS, line=1.35, first=True)
 
 tf = tb(s1, 8.05, 3.45, 4.4, 0.4)
-para(tf, "Ofcom / National Literacy Trust  ·  WEF Global Risks Report", 8, RGBColor(0x5A,0x5A,0x64), SANS, first=True)
+para(tf, "National Literacy Trust, Commission on Fake News (2018)  ·  WEF Global Risks Report 2024–2026", 7.5, RGBColor(0x5A,0x5A,0x64), SANS, first=True)
 
 rule(s1, 8.05, 4.35, 4.4, RGBColor(0x2A,0x2A,0x33))
 tf = tb(s1, 8.05, 4.6, 4.4, 1.6)
@@ -150,7 +150,7 @@ para(tf, "The Misinformation Lab  ·  IEEE Metaverse Grand Challenge 2026", 9,
 notes(s1, "Open here. The point of this slide is that the problem is not ignorance, it is "
           "speed and reflex. Every media-literacy tool teaches recognition; recognition is "
           "already there and it still fails. That is what justifies role reversal instead of "
-          "another explainer. Verify both cited figures against your sources before submitting.")
+          "another explainer.\n\nBoth figures are checked. The 2% is the Commission on Fake News (National Literacy Trust, June 2018). On the WEF: misinformation was the #1 two-year risk in the 2024 and 2025 Global Risks Reports and #2 in 2026, behind geoeconomic confrontation — so say 'three years running as one of the most severe', not 'number one', which is now out of date.")
 
 # =============================================================================
 # SLIDE 2 — implementation design: three phases, three kinds of software
@@ -345,11 +345,11 @@ panels = [
     ("Access", P1_ACT, [
         ("Any browser.", "No headset, no install, no account, no login, no personal data collected."),
         ("88 KB of code, gzipped.", "Plus ~1.5 MB of photography. The whole thing is static files — it loads on a school Chromebook over school wi-fi."),
-        ("Keyboard-complete.", "Every screen, including the final reveal. Live-region announcements for screen readers, and reduced-motion honoured throughout."),
+        ("Zero WCAG AA violations.", "Audited with axe-core across all fourteen screens. Keyboard-complete including the final reveal, live-region announcements, reduced-motion honoured."),
     ]),
     ("Ethics", MARK, [
         ("Everything is fictional.", "Invented towns, outlets and people. Riverton and Eastvale do not exist, and no claim made here refers to anything real."),
-        ("The AI refuses.", "Name a real person, organisation or event and the strategist declines in character, stating why. It only ever works inside the scenario."),
+        ("The AI declares itself.", "It refuses every real person, organisation and event — and carries a standing notice that it can be wrong and argues for whatever you ask it to."),
         ("Nothing leaves the browser.", "No account, no server, no analytics. Images a student attaches are processed on their own device and never uploaded anywhere."),
     ]),
     ("Technology", P2_ACT, [
@@ -378,7 +378,8 @@ para(tf, "Classroom-ready as it stands: a teacher opens a URL, a class of thirty
          "ten minutes, and every student leaves with a named vulnerability and one habit "
          "that counters it.", 11.5, P3_INK, SANS, line=1.5, first=True)
 
-notes(s5, "On ethics, be precise, because a judge may press on it. The app does let a student "
+notes(s5, "Full position is in docs/ETHICS.md — quote from it if pressed.\n\n"
+          "On ethics, be precise, because a judge may press on it. The app does let a student "
           "attach their own photo to a false headline — that is deliberate, because pairing a "
           "real image with a false claim is the most common real tactic there is, and doing it "
           "yourself teaches it faster than being told. What constrains it: the scenario is "

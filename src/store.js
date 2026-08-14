@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { R1, R2 } from "./data/posts";
+import { R1, R2, DEFAULT_POST_IMAGE } from "./data/posts";
 import { getPool } from "./services/communityPool";
 
 // State shape — SPEC.md §4. Two rounds, because the before/after delta is the
@@ -47,7 +47,7 @@ const BASE = {
   // always kept in sync with this (one id per placedArtifacts entry) for the canonical cred/reach math.
   placedArtifacts: [],
   postSource: "Riverton Daily Report · Sponsored",
-  postImage: null, // null = default CSS gradient from the stylesheet
+  postImage: DEFAULT_POST_IMAGE,
   postImageCaption: "Riverton reservoir",
   valeLog: [],
   reach: 0,

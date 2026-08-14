@@ -5,26 +5,26 @@ export default function CampaignSetup({ aud, hook, onAud, onHook, onOpenStrategi
 
   return (
     <div className="pad" id="p2a">
-      <span className="lab">Audience</span>
-      <select value={aud} onChange={(e) => onAud(e.target.value)}>
+      <label className="lab" htmlFor="aud-select">Audience</label>
+      <select id="aud-select" value={aud} onChange={(e) => onAud(e.target.value)}>
         <option value="">Choose an audience</option>
         <option value="parents">Parents, 30–50, small towns</option>
         <option value="teens">Teenagers, 14–18</option>
         <option value="commuters">Commuters, 25–60</option>
         <option value="retired">Retired residents, 65+</option>
       </select>
-      <span className="lab">Emotional hook</span>
-      <select value={hook} onChange={(e) => onHook(e.target.value)}>
+      <label className="lab" htmlFor="hook-select">Emotional hook</label>
+      <select id="hook-select" value={hook} onChange={(e) => onHook(e.target.value)}>
         <option value="">Choose a hook</option>
         <option value="fear">Fear — something is being hidden</option>
         <option value="outrage">Outrage — someone got away with it</option>
         <option value="belonging">Belonging — people like you already know</option>
         <option value="pride">Pride — you're smarter than the rest</option>
       </select>
-      <div className="meter">
+      <div className="meter" role="group" aria-label="Audience match">
         <span>Audience match</span>
         <span className="mb"><i style={{ background: "var(--p2act)", width: match + "%" }} /></span>
-        <span className="mv">{match ? match + "%" : "—"}</span>
+        <span className="mv" role="status" aria-live="polite">{match ? match + "%" : "—"}</span>
       </div>
 
       {/* Two ways in — Vale writes the opening draft for you, or you start

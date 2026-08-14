@@ -1,6 +1,6 @@
 #p3 { background: #fff; color: var(--p3ink); font-family: "Newsreader", serif; padding: 30px 26px 22px; cursor: pointer; }
 .plab { font-family: var(--mono); font-size: 9.5px; letter-spacing: .18em; text-transform: uppercase; color: var(--p3mute); margin-bottom: 22px; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
-.pcount { letter-spacing: .1em; color: #B5B5B5; }
+.pcount { letter-spacing: .1em; color: var(--p3mute); }
 #p3:focus-visible { outline: 2px solid var(--mark); outline-offset: -4px; }
 /* Both rounds side by side — the delta only reads if you can see the two
    grids at once. Stacks on narrow screens. */
@@ -16,7 +16,7 @@
 .big em { font-style: italic; color: var(--mark); }
 .sm { font-size: 13.5px; color: var(--p3mute); line-height: 1.55; margin: 0; }
 .g9 { display: grid; grid-template-columns: repeat(5,1fr); gap: 7px; margin: 2px 0 18px; }
-.cell { aspect-ratio: 1; border-radius: 7px; border: 1px solid var(--p3line); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 10px; color: #B5B5B5; opacity: 0; transform: scale(.9); transition: .3s; }
+.cell { aspect-ratio: 1; border-radius: 7px; border: 1px solid var(--p3line); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 10px; color: #707070; opacity: 0; transform: scale(.9); transition: .3s; }
 .cell.in { opacity: 1; transform: none; }
 .cell.bad { background: var(--mark); border-color: var(--mark); color: #fff; }
 .tmr { display: flex; align-items: center; gap: 9px; margin-bottom: 7px; font-family: var(--mono); font-size: 10px; }
@@ -30,7 +30,10 @@
 .half .k { font-family: var(--mono); font-size: 9px; letter-spacing: .13em; text-transform: uppercase; color: var(--p3mute); margin-bottom: 6px; }
 .half .v { font-size: 13.5px; line-height: 1.42; font-style: italic; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 16px; }
-.chip { font-family: var(--mono); font-size: 10px; padding: 5px 9px; border-radius: 20px; border: 1px solid var(--p3line); color: var(--p3mute); }
+/* Explicit background: the debrief reflection chips are <button> elements, and
+   without this they picked up the UA default grey — which both looked wrong
+   next to the non-button chips and dropped the label under 4.5:1. */
+.chip { font-family: var(--mono); font-size: 10px; padding: 5px 9px; border-radius: 20px; border: 1px solid var(--p3line); color: var(--p3mute); background: #fff; }
 .chip.hit { background: var(--mark); border-color: var(--mark); color: #fff; }
 .profb { margin-top: auto; }
 .pk { font-family: var(--mono); font-size: 9px; letter-spacing: .13em; text-transform: uppercase; color: var(--p3mute); margin-bottom: 8px; }

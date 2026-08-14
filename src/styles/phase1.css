@@ -11,11 +11,13 @@
   font-family: var(--mono); font-size: 10px; background: var(--p1card);
   border: 1px solid var(--p1line); border-radius: 4px; padding: 1px 5px; color: var(--p1ink);
 }
-.taskline { padding: 14px 16px 0; text-align: center; }
-.taskline b { display: block; font-size: 15px; font-weight: 600; color: var(--p1ink); }
-.taskline span { display: block; font-size: 12px; color: var(--p1mute); margin-top: 3px; }
+/* Centred above the post, compact enough that the verdict buttons still fit
+   above the fold on a laptop — that balance is what the card clamp below is for. */
+.taskline { padding: 12px 16px 0; text-align: center; }
+.taskline b { display: block; font-size: 15px; font-weight: 600; color: var(--p1ink); letter-spacing: -.01em; }
+.taskline span { display: block; font-size: 12px; color: var(--p1mute); margin-top: 2px; }
 /* min-height, not height: a long post used to overflow a fixed 364px card. */
-.deck { position: relative; margin: 14px 16px 0; min-height: 364px; display: flex; }
+.deck { position: relative; margin: 14px 16px 0; min-height: 400px; display: flex; }
 .card { position: relative; width: 100%; background: var(--p1card); border: 1px solid var(--p1line); border-radius: 15px; overflow: hidden; box-shadow: 0 3px 14px rgba(16,18,28,.07); display: flex; flex-direction: column; touch-action: none; user-select: none; }
 .cmeta { display: flex; gap: 10px; align-items: center; padding: 13px 14px 9px; }
 .av { width: 36px; height: 36px; border-radius: 50%; flex: none; }
@@ -28,20 +30,42 @@
 .tag { position: absolute; top: 15px; font-family: var(--mono); font-size: 13px; letter-spacing: .12em; padding: 6px 11px; border-radius: 7px; opacity: 0; border: 2px solid currentColor; font-weight: 500; pointer-events: none; }
 .tag.tl { left: 14px; color: #E04A4A; transform: rotate(-9deg); }
 .tag.tr { right: 14px; color: #12A55E; transform: rotate(9deg); }
-.acts { display: flex; gap: 9px; padding: 14px 16px 0; }
-.act { flex: 1; padding: 12px 6px; border-radius: 12px; border: 1px solid var(--p1line); background: var(--p1card); font-size: 14px; font-weight: 600; color: var(--p1ink); }
-.act small { display: block; font-weight: 400; font-size: 10.5px; color: var(--p1mute); margin-top: 3px; }
+.acts { display: flex; gap: 10px; padding: 14px 16px 0; }
+/* The two verdicts are the entire interaction, so they get a real target size
+   and carry their colour at rest rather than only revealing it on hover —
+   hover doesn't exist on touch, which is where most of this gets used. */
+.act {
+  flex: 1; padding: 15px 10px; border-radius: var(--r-md);
+  border: 1.5px solid var(--p1line); background: var(--p1card);
+  font-size: 15px; font-weight: 600; letter-spacing: -.01em; color: var(--p1ink);
+}
+.act small { display: block; font-weight: 400; font-size: 11px; color: var(--p1mute); margin-top: 4px; }
+.act::before {
+  content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+  margin-right: 8px; vertical-align: middle; transition: transform .15s var(--e-out);
+}
+.act.flag::before { background: #E04A4A; }
+.act.trust::before { background: #12A55E; }
+.act:not(:disabled):hover::before { transform: scale(1.35); }
 .act.flag:hover { border-color: #E04A4A; color: #E04A4A; }
 .act.trust:hover { border-color: #12A55E; color: #12A55E; }
-.act.flag:hover small, .act.trust:hover small { color: inherit; opacity: .75; }
+.act:disabled { opacity: .45; }
 .vbtn { width: calc(100% - 32px); margin: 9px 16px 0; padding: 12px; border-radius: 11px; border: 1px solid var(--p1line); background: var(--p1card); font-size: 13px; font-weight: 600; }
 .vbtn small { display: block; font-weight: 400; font-size: 11px; color: var(--p1mute); margin-top: 2px; }
-.hint { text-align: center; font-size: 11px; color: var(--p1mute); padding: 10px 0 0; }
+.hint { text-align: center; font-size: 11px; color: var(--p1mute); padding: 8px 0 0; }
 /* Fixed, not absolute: as an absolutely-positioned child of #p1 the open sheet
    added its own height to the page, which is how it ended up visible below the
    phase-2 interstitial instead of over the feed. */
 .sheet { position: fixed; left: 0; right: 0; bottom: 0; background: var(--p1card); border-radius: 16px 16px 0 0; padding: 18px 16px 22px; transform: translateY(103%); transition: transform .28s ease; box-shadow: 0 -8px 30px rgba(16,18,28,.14); z-index: 40; }
 .sheet.up { transform: none; }
+/* Scrim behind the verify sheet — dismisses on click and blocks the card
+   underneath. Pointer-events only while open so it never eats a swipe. */
+.sheet-scrim {
+  position: fixed; inset: 0; z-index: 39; background: rgba(16,18,28,.34);
+  opacity: 0; pointer-events: none; transition: opacity .28s var(--e-soft);
+  backdrop-filter: blur(2px);
+}
+.sheet-scrim.on { opacity: 1; pointer-events: auto; }
 .sheet h4 { margin: 0 0 3px; font-size: 15px; font-weight: 600; }
 .sheet .s { margin: 0 0 14px; font-size: 12px; color: var(--p1mute); }
 .vrow { display: flex; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid var(--p1line); font-size: 13px; }
@@ -87,17 +111,31 @@
 /* Desktop: center a comfortable reading column on the full-bleed phase background
    instead of a fixed-width phone strip. */
 @media (min-width: 700px) {
-  #p1 .bar, #prof .bar { max-width: 640px; margin: 0 auto; width: 100%; padding: 22px 8px; }
-  .deck { max-width: 440px; width: 100%; margin: 28px auto 0; min-height: 460px; }
+  /* 14px inset matches the card's internal padding, so the brand and the post
+     text sit on the same line. At 0 the content was flush against the edge of
+     the white band, which is what made this read as unfinished. */
+  #p1 .bar { max-width: 440px; margin: 0 auto; width: 100%; padding: 16px 14px; }
+  #prof .bar { max-width: 440px; margin: 0 auto; width: 100%; padding: 16px 14px; }
+  /* Height scales with the window instead of being fixed at 460px. At 460 the
+     whole screen came to 844px tall, so on any laptop shorter than that the
+     two verdict buttons sat below the fold and you had to scroll to answer the
+     question — which also quietly breaks the decision timing, since the clock
+     is running while you hunt for the controls. */
+  .deck { max-width: 440px; width: 100%; margin: 18px auto 0; min-height: clamp(300px, 47vh, 470px); }
   .card { border-radius: 18px; }
   .acts { max-width: 440px; width: 100%; margin: 0 auto; padding: 18px 0 0; }
   .vbtn { max-width: 440px; width: 100%; margin: 10px auto 0; }
-  .hint { max-width: 440px; width: 100%; margin: 10px auto 0; padding: 10px 0 0; }
-  .sheet { max-width: 640px; margin-left: auto; margin-right: auto; border-radius: 16px; bottom: 24px; box-shadow: 0 12px 40px rgba(16,18,28,.18); }
-  .phead { max-width: 640px; margin: 0 auto; width: 100%; padding: 24px 8px 20px; }
-  .psec { max-width: 640px; margin: 0 auto; width: 100%; padding: 22px 8px 0; }
-  .pbtn2 { max-width: 640px; width: 100%; margin: 22px auto 32px; }
-  .pactions { max-width: 640px; width: 100%; margin: 22px auto 32px; }
+  .hint { max-width: 440px; width: 100%; margin: 8px auto 0; padding: 6px 0 0; }
+  .sheet { max-width: 440px; margin-left: auto; margin-right: auto; border-radius: 16px; bottom: 24px; box-shadow: 0 12px 40px rgba(16,18,28,.18); }
+  .sheet:not(.up) { transform: translateY(calc(100% + 48px)); }
+  /* Matched to Phase 1's 440px card. The profile is meant to read as the same
+     feed the learner was just judging — at 640px their own post was half as
+     wide again as every post they'd seen, which broke the mirroring the whole
+     screen depends on. */
+  .phead { max-width: 440px; margin: 0 auto; width: 100%; padding: 20px 14px 18px; }
+  .psec { max-width: 440px; margin: 0 auto; width: 100%; padding: 22px 0 0; }
+  .pbtn2 { max-width: 440px; width: 100%; margin: 22px auto 32px; }
+  .pactions { max-width: 440px; width: 100%; margin: 22px auto 32px; }
 }
 
 /* --- surface pass: feed + profile ---------------------------------------- */
@@ -119,3 +157,13 @@
 .pbtn2 { border-radius: var(--r-md); box-shadow: var(--sh-1); }
 .pbtn2:not(:disabled):hover { box-shadow: var(--sh-2); transform: translateY(-1px); }
 .pdelta { border-radius: var(--r-md); }
+
+/* Contrast. The tinted hover backgrounds added in the surface pass dropped the
+   flag/trust text below 4.5:1 against their own new grounds — darker inks on
+   the hover state only, so the resting palette is untouched. */
+.act.flag:not(:disabled):hover { color: #C93A3A; border-color: #C93A3A; }
+.act.trust:not(:disabled):hover { color: #0B7A45; border-color: #0B7A45; }
+/* The sub-label inherited the hover ink at 75% opacity, which lands at 3.2:1.
+   Opacity is the wrong tool for a colour that has to meet a contrast floor. */
+.act.flag:not(:disabled):hover small { color: #C93A3A; opacity: 1; }
+.act.trust:not(:disabled):hover small { color: #0B7A45; opacity: 1; }

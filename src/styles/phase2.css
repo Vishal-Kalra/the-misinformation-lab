@@ -194,20 +194,25 @@ select {
     grid-template-areas:
       "canvas tools"
       "meter  tools";
+    grid-template-rows: 360px auto;
     gap: 24px;
     align-items: start;
   }
   .composer .canvas { grid-area: canvas; margin: 0; height: 360px; }
   .composer .k-img { height: 302px; }
-  .composer-tools { grid-area: tools; }
+  /* The tools column scrolls inside itself rather than growing the page — a
+     long Vale conversation shouldn't move the post or the Publish button. */
+  .composer-tools { grid-area: tools; display: flex; flex-direction: column;
+                    max-height: calc(100dvh - 190px); min-height: 0; }
+  .composer-tools .tp { flex: 1; min-height: 0; overflow-y: auto; }
   .composer-tools .tabs { padding: 0; }
   .composer-tools .tab-hint { margin: 8px 0 0; }
   .composer-tools .tp { margin: 0; }
-  .composer-tools .chat { max-height: 320px; }
+  .composer-tools .chat { max-height: 300px; }
   .composer > .pad { grid-area: meter; margin: 0; padding: 0; align-self: start; }
 }
 @media (min-width: 1200px) {
-  .composer { grid-template-columns: 1fr 440px; }
+  .composer { grid-template-columns: 1fr 440px; grid-template-rows: 420px auto; }
   .composer .canvas { height: 420px; }
   .composer .k-img { height: 362px; }
 }
@@ -247,3 +252,16 @@ select {
 .img-picker-actions { flex-direction: row; }
 .img-picker-actions .c-upload { flex: 1; }
 @media (max-width: 560px) { .img-picker-actions { flex-direction: column; } }
+
+/* Inactive tab sat at 4.22:1 on its own background — under AA for body text. */
+.tab { color: #615980; }
+
+/* Standing AI disclosure under the chat. Muted but permanent — not dismissible,
+   not a tooltip. On a screen teaching that confident text is not evidence, the
+   app's own AI has to carry the same warning. */
+.vdisc {
+  margin: 12px 0 0; padding: 9px 11px; border-radius: var(--r-sm);
+  background: var(--p2bg); border: 1px solid var(--p2line);
+  font-size: 10.5px; line-height: 1.5; color: var(--p2mute);
+}
+.vdisc b { display: block; color: var(--p2ink); font-weight: 600; margin-bottom: 2px; }

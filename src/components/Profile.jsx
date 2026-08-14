@@ -69,7 +69,7 @@ export default function Profile({ onRoundTwo, onSeeResult }) {
             </div>
           </div>
           <div className="ctxt" style={{ fontWeight: 600 }}>{campaign.head}</div>
-          <div className="cimg" style={{ background: postImage || "linear-gradient(150deg,#9DB4D6,#6E88B4)", minHeight: 112 }}>
+          <div className="cimg" style={{ background: postImage || "linear-gradient(150deg,#9DB4D6,#6E88B4)", minHeight: 200 }}>
             <em>{postImageCaption}</em>
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 5, padding: "9px 14px 0" }}>

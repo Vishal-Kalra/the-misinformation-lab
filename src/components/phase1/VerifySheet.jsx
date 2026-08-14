@@ -24,6 +24,15 @@ export default function VerifySheet({ open, post, onClose }) {
   }, [open, onClose]);
 
   return (
+    <>
+      {/* Click-anywhere-outside to dismiss. A sheet you can only close with its
+          own button is a small trap — and the scrim also stops clicks landing
+          on the card underneath while the sheet is up. */}
+      <div
+        className={`sheet-scrim ${open ? "on" : ""}`}
+        onPointerDown={onClose}
+        aria-hidden="true"
+      />
     <div
       className={`sheet ${open ? "up" : ""}`}
       role="dialog"
@@ -39,5 +48,6 @@ export default function VerifySheet({ open, post, onClose }) {
       <div className="vrow"><span>Image first seen</span><span>{post?.v?.[2] ?? "—"}</span></div>
       <button className="dark" ref={closeRef} onClick={onClose}>Back to the post</button>
     </div>
+    </>
   );
 }

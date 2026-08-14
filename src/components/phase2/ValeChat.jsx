@@ -3,6 +3,10 @@ import { VALE_SUGGESTIONS } from "../../data/posts";
 
 export default function ValeChat({ messages, options, selectedOption, onSelectOption, onSend, thinking }) {
   const [text, setText] = useState("");
+  // Used suggestions drop out of the list, so the chips stay useful instead of
+  // offering the same rewrite the learner already applied. Once they've all
+  // been used the full set comes back rather than leaving an empty row.
+  const [used, setUsed] = useState([]);
   const chatRef = useRef(null);
 
   useEffect(() => {
@@ -14,7 +18,10 @@ export default function ValeChat({ messages, options, selectedOption, onSelectOp
     if (!t || thinking) return;
     onSend(t);
     setText("");
+    if (value) setUsed((u) => (u.length + 1 >= VALE_SUGGESTIONS.length ? [] : [...u, value]));
   };
+
+  const suggestions = VALE_SUGGESTIONS.filter((s) => !used.includes(s));
 
   return (
     <div className="tp on" id="t-va">
@@ -76,10 +83,20 @@ export default function ValeChat({ messages, options, selectedOption, onSelectOp
 
       {/* Removes the "what am I supposed to type?" problem entirely. */}
       <div className="vsug">
-        {VALE_SUGGESTIONS.map((s) => (
+        {suggestions.map((s) => (
           <button key={s} className="vsugb" onClick={() => send(s)} disabled={thinking}>{s}</button>
         ))}
       </div>
+
+      {/* Standing AI disclosure. An app whose entire subject is being misled by
+          confident text cannot present its own AI as authoritative — the lesson
+          has to apply to this screen too. Kept permanently visible rather than
+          behind a tooltip, and deliberately worded to invite scepticism about
+          Vale specifically, not just AI in the abstract. */}
+      <p className="vdisc">
+        Vale is AI and can make mistakes — it argues for whatever you ask it to. Everything here is
+        invented. Double-check responses.
+      </p>
     </div>
   );
 }

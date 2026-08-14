@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useStore } from "../../store";
-import { ARTS, AUD_BASE, SHARE_CASCADE } from "../../data/posts";
-import { getAudienceMatch, getOpeningOptions, getOpeningIntroMessage, getValeResponse } from "../../services/valeService";
+import { ARTS, computeReach } from "../../data/posts";
+import { getAudienceMatch, getOpeningOptions, getOpeningIntroMessage, getValeResponse, generateVisualTheme } from "../../services/valeService";
 import { addToPool, buildCommunityPost, getPoolCount } from "../../services/communityPool";
 import CampaignSetup from "./CampaignSetup";
 import PostCanvas from "./PostCanvas";
@@ -56,6 +56,9 @@ export default function Phase2({ onPublished }) {
   const [selectedUid, setSelectedUid] = useState(null);
   const [imagePickerOpen, setImagePickerOpen] = useState(false);
   const [thinking, setThinking] = useState(false);
+  // Set once the learner picks a picture themselves — after that the headline
+  // stops overriding their choice.
+  const [imagePinned, setImagePinned] = useState(false);
 
   // Publishing always adds the post to the shared pool too — no separate
   // "submit to the pool" button anymore, see launch() below. poolCount is
@@ -114,6 +117,7 @@ export default function Phase2({ onPublished }) {
     const h = options[idx].headline;
     setCampaignField("head", h);
     swapHeadline(h);
+    matchImageToHeadline(h);
   };
 
   // Variable delay + a typing indicator so Vale reads as writing rather than
@@ -129,6 +133,7 @@ export default function Phase2({ onPublished }) {
         setCampaignField("head", result.headline);
         setCampaignField("match", result.match);
         swapHeadline(result.headline);
+        matchImageToHeadline(result.headline);
         logValeRequest(result.intent);
       }
       setMessages((m) => [...m, {
@@ -160,7 +165,17 @@ export default function Phase2({ onPublished }) {
 
   const pickImage = (grad, label) => {
     setPostImage(grad, label);
+    setImagePinned(true);
     setImagePickerOpen(false);
+  };
+
+  // Keep the picture in step with the headline. Rewriting "the water" into
+  // "reported symptoms" should not leave a reservoir photo sitting under it —
+  // the post has to stay believable as a whole for Phase 2 to teach anything.
+  const matchImageToHeadline = (headlineText) => {
+    if (imagePinned || !headlineText) return;
+    const { img, label } = generateVisualTheme(headlineText);
+    setPostImage(img, label);
   };
 
   // drag-to-canvas for the artifact palette, plus dragging already-placed
@@ -236,7 +251,7 @@ export default function Phase2({ onPublished }) {
       ? [...artifacts].sort((x, y) => ARTS.find((a) => a.id === y).w - ARTS.find((a) => a.id === x).w)[0]
       : null;
     const topArt = topId ? ARTS.find((a) => a.id === topId) : null;
-    const reach = Math.round(AUD_BASE * (campaign.match / 100) * (cred / 100) * SHARE_CASCADE);
+    const { reach } = computeReach(campaign.match, cred);
     setReachAndCred(reach, cred, topArt ? topArt.n : null);
 
     const signalNames = [...new Set(artifacts.map((id) => ARTS.find((a) => a.id === id)?.n).filter(Boolean))];

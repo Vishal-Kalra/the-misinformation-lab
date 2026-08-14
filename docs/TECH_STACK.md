@@ -172,3 +172,27 @@ bug. Neither is obvious from reading the declaration:
 Related: overlays that cover a whole screen (`.sheet`, `.inter`, `#spread`, `.img-picker-overlay`) are
 all `position: fixed`. As `absolute` children they were anchored to a document box that can exceed the
 viewport, which put their centred content off-screen — the same failure in four places.
+
+## Accessibility — audited, not asserted
+
+Accessibility is 10% of the competition's judging criteria and the deck claims it explicitly, so it is
+verified rather than assumed. An axe-core pass over all fourteen screens (seven app screens plus the
+seven Phase 3 beats), restricted to `wcag2a / wcag2aa / wcag21a / wcag21aa`, reports **zero
+violations**.
+
+Things worth not regressing:
+
+- **`role="button"` on a container is a trap.** Phase 3 briefly had `role="button"` + `tabIndex` on the
+  whole section to make click-to-advance keyboard-operable. That section contains the Back/Next
+  controls, and a button role with focusable descendants is invalid (`nested-interactive`). Those
+  buttons plus the document key handler already provide the keyboard path; the container needs no role.
+- **A styled `<span>` is not a label.** Both Phase 2 selects were announced as unnamed combo boxes,
+  on the screen where the entire campaign is configured. They use `<label for>` now.
+- **Opacity is not a colour.** The flag/trust hover sub-labels were dimmed with `opacity: .75`, which
+  put them at 3.2:1. Anything that must clear a contrast floor needs an explicit colour.
+- **A `<button>` with no `background` inherits the UA grey.** The debrief reflection chips rendered in
+  Chrome's default `#efefef`, which both looked wrong and failed contrast.
+
+To re-run: serve the app, then drive it with Playwright injecting `axe-core` at each screen. The
+scripts used are not committed — the check takes a few minutes to reconstruct and is worth repeating
+before submission rather than trusting this note.

@@ -98,11 +98,9 @@ export default function Phase1({ onDone }) {
   return (
     <section id="p1" className="scr">
       <FeedHeader index={i} total={posts.length} round={round} />
-      {/* The task was never stated on screen — the feed just appeared and the
-          learner had to infer what the two buttons meant. */}
       <div className="taskline">
         <b>Is this post real or fabricated?</b>
-        <span>{posts.length} posts in this round. Some are genuine, some aren't.</span>
+        <span>Some are genuine, some aren't.</span>
       </div>
       <div className="deck">
         <SwipeCard

@@ -74,13 +74,16 @@ export default function Phase3({ onDone }) {
   }, [b]);
 
   return (
+    // Click-anywhere-to-advance is a convenience, not the accessible path —
+    // the Back/Next buttons and the key handler are. It deliberately carries no
+    // button role: this element contains those buttons, and a role="button"
+    // with focusable descendants is invalid (axe: nested-interactive).
     <section
       id="p3"
       className="scr"
       onClick={advance}
-      role="button"
-      tabIndex={0}
-      aria-label={`${LABELS[b]}. Beat ${b + 1} of ${LABELS.length}. Press Enter to continue.`}
+      aria-roledescription="Report"
+      aria-label={`${LABELS[b]}, beat ${b + 1} of ${LABELS.length}`}
     >
       <div className="plab">
         {LABELS[b]}

@@ -4,7 +4,7 @@
 
   --p1bg: #FBFBFD; --p1card: #FFF; --p1ink: #16181C; --p1mute: #65686D; --p1line: #E4E6EB; --p1act: #1D6FF2;
   --p2bg: #F1EFF8; --p2card: #FFF; --p2ink: #241A47; --p2mute: #6F6791; --p2line: #E3DFF2; --p2act: #4B32A8; --go: #0F9D58;
-  --p3ink: #111; --p3mute: #7A7A7A; --p3line: #E6E6E6; --mark: #B4522A;
+  --p3ink: #111; --p3mute: #707070; --p3line: #E6E6E6; --mark: #B4522A;
 }
 
 * { box-sizing: border-box; }
